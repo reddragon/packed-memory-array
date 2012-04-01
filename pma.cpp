@@ -16,8 +16,8 @@ class PackedMemoryArray {
     double T_0, T_l;
     // The space requirement for n elements would be cn
     double c;
-    // Number of levels
-    int total_levels;
+    // Number of levels = l+1
+    int l;
 
     public:
     PackedMemoryArray();
@@ -27,35 +27,55 @@ class PackedMemoryArray {
 
     // Insert after the element elem
     void insert_elem(E elem);
-    // Delete the element at index 'index'
-    bool delete_elem(int index);
+    
+    // TODO Delete the element at index 'index'
+    //      Support this later.
+    //      bool delete_elem(int index);
+    
     // Return the element at index 'index'
     E elem_at(int index);
     // Does an element exist at position index?
-    bool elem_exists_at(int index);
-    
+    bool elem_exists_at(int index) const;
+    // Capacity at level 'level'
+    int capacity_at(int level) const;
+
     private:
-    // Is the current PMA too full?
-    bool is_too_full();
+    // Is the current PMA too full, with n_elems elements?
+    bool is_too_full(int n_elems) const;
+    // Is the 'level' level out of balance with n_elems elems?
+    bool is_out_of_balance(int n_elems, int level) const;
     // Create a new PMA of size 'n_elems' 
     void new_PMA(int n_elems);
     // Rebalance the n-th node at level 'level'
-    void rebalance(int n, int level);
+    void rebalance(int node_n, int level);
     // Return the threshold at 'level'
-    double threshold_at_level(int level);
+    double upper_threshold_at(int level) const;
 };
 
 template <class E>
-double PackedMemoryArray<E>::threshold_at_level(int level) {
-    assert(level <= total_levels);
-    return T_0 - ((T_0 - T_l) * 1.0 * level) / total_levels; 
+double PackedMemoryArray<E>::upper_threshold_at(int level) const {
+    assert(level <= l);
+    return T_0 - ((T_0 - T_l) * 1.0 * level) / l; 
 }
 
 template <class E>
-bool PackedMemory<E>::elem_exists_at(int index) {
+bool PackedMemoryArray<E>::elem_exists_at(int index) const {
     assert(index < (sizeof(int)*exists_bitmask.size()));
-    return exists_bitmask[index/sizeof(int)];
+    return (exists_bitmask[index/sizeof(int)] & (1<<(index % sizeof(int))));
 }
+
+template <class E>
+bool PackedMemoryArray<E>::is_too_full(int n_elems) const {
+    // TODO Will change when we get lower thresholds
+    return is_out_of_balance(n_elems, l);
+}
+
+template <class E>
+bool PackedMemoryArray<E>::is_out_of_balance(int n_elems, int level) const {
+   // TODO Will change when we get lower thresholds
+   return ((int)floor(upper_threshold_at(level) * capacity_at(level)) > n_elems);
+}
+
 
 
 
