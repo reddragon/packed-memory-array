@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <vector>
+#include <cassert>
 
 #define DEFAULT_C 2
 #define DEFAULT_T_O 0.5
@@ -16,7 +17,7 @@ class PackedMemoryArray {
     // The space requirement for n elements would be cn
     double c;
     // Number of levels
-    int l;
+    int total_levels;
 
     public:
     PackedMemoryArray();
@@ -38,11 +39,24 @@ class PackedMemoryArray {
     bool is_too_full();
     // Create a new PMA of size 'n_elems' 
     void new_PMA(int n_elems);
-    // Rebalance the level 'level'
-    void rebalance(int level);
+    // Rebalance the n-th node at level 'level'
+    void rebalance(int n, int level);
     // Return the threshold at 'level'
     double threshold_at_level(int level);
 };
+
+template <class E>
+double PackedMemoryArray<E>::threshold_at_level(int level) {
+    assert(level <= total_levels);
+    return T_0 - ((T_0 - T_l) * 1.0 * level) / total_levels; 
+}
+
+template <class E>
+bool PackedMemory<E>::elem_exists_at(int index) {
+    assert(index < (sizeof(int)*exists_bitmask.size()));
+    return exists_bitmask[index/sizeof(int)];
+}
+
 
 
 int main() {
