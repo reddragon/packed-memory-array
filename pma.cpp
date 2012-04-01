@@ -1,14 +1,16 @@
 #include <cstdio>
+#include <vector>
 
-template <class E> 
 #define DEFAULT_C 2
 #define DEFAULT_T_O 0.5
 #define DEFAULT_T_L 1.0
+
+template <class E> 
 class PackedMemoryArray {
     // The actual array
-    vector<E> store;
+    std::vector<E> store;
     // A bitmask to check if an element exists or not
-    vector<int> exists_bitmask;
+    std::vector<int> exists_bitmask;
     // Upper thresholds for the level 0, and level l
     double T_0, T_l;
     // The space requirement for n elements would be cn
@@ -19,7 +21,7 @@ class PackedMemoryArray {
     public:
     PackedMemoryArray();
     PackedMemoryArray(E e);
-    PackedMemoryArray(vector<E> v);
+    PackedMemoryArray(std::vector<E> v);
     ~PackedMemoryArray();
 
     // Insert after the element elem
@@ -27,7 +29,7 @@ class PackedMemoryArray {
     // Delete the element at index 'index'
     bool delete_elem(int index);
     // Return the element at index 'index'
-    T elem_at(int index);
+    E elem_at(int index);
     // Does an element exist at position index?
     bool elem_exists_at(int index);
     
@@ -41,7 +43,6 @@ class PackedMemoryArray {
     // Return the threshold at 'level'
     double threshold_at_level(int level);
 };
-
 
 
 int main() {
