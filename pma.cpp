@@ -62,10 +62,10 @@ class PackedMemoryArray {
     bool is_too_full() const;
     // Is the 'level' level out of balance with n_elems elems?
     bool is_out_of_balance(int n_elems, int level) const;
-    // Create a new PMA of size 'n_elems' 
-    void new_PMA(int n_elems);
-    // Rebalance the n-th node at level 'level'
-    void rebalance(int node_n, int level);
+    // Expand (double up) the current PMA and insert element e
+    void expand_PMA(E e);
+    // Rebalance from the index 'index' at level 'level'
+    void rebalance(int index, int level);
     // Return the threshold at 'level'
     double upper_threshold_at(int level) const;
     // Find the smallest interval encompassing index 'index' which is not out of balance
@@ -80,7 +80,7 @@ double PackedMemoryArray<E>::upper_threshold_at(int level) const {
 
 template <class E>
 bool PackedMemoryArray<E>::elem_exists_at(int index) const {
-    assert(index < (sizeof(int)*exists_bitmask.size()));
+    assert(index < (8*sizeof(int)*exists_bitmask.size()));
     return (exists_bitmask[index/(8*sizeof(int))] & (1<<(index % (8*sizeof(int)))));
 }
 
@@ -93,7 +93,8 @@ bool PackedMemoryArray<E>::is_too_full() const {
 template <class E>
 bool PackedMemoryArray<E>::is_out_of_balance(int n_elems, int level) const {
    // TODO Will change when we get lower thresholds
-   return ((int)floor(upper_threshold_at(level) * capacity_at(level)) > n_elems);
+   std::cout << "Max capacity at level " << level << ": " << (int)floor(upper_threshold_at(level) * capacity_at(level))  << " " << n_elems << std::endl;
+   return ((int)floor(upper_threshold_at(level) * capacity_at(level)) < n_elems);
 }
 
 template <class E>
@@ -121,6 +122,7 @@ template <class E>
 PackedMemoryArray<E>::PackedMemoryArray(E e) : c(VAL_C), t_0(VAL_T_0), t_l(VAL_T_L) {
     // Assert that c is a power of 2 and > 1
     assert(c > 1 && !(c & (c-1)));
+    s = 0;
     // Get the new store
     store.resize(c*1);
     // Resize the bitmask as well
@@ -139,6 +141,7 @@ PackedMemoryArray<E>::~PackedMemoryArray() {
 
 template <class E>
 void PackedMemoryArray<E>::print() const {
+    std::cout << s << " " << store_size() << " " << exists_bitmask.size() << std::endl;
     for (int i = 0; i < store_size(); i++) {
         if(!elem_exists_at(i))
             std::cerr << "-- ";
@@ -190,17 +193,129 @@ void PackedMemoryArray<E>::insert_element_after(E e, E after) {
     }
     // The not so nice part begins here.
     // TODO Put the search for rebalance logic here
+    int node_index, node_level;
+    if(smallest_interval_in_balance(insert_at, &node_index, &node_level) == -1) {
+        // No more space left in the PMA. Resize!
+        std::cout << "Need to expand the PMA" << std::endl;
+        expand_PMA(e);
+    }
+    else {
+        // Rebalance one particular level
+        std::cout << "Is balanced from " << node_index << " at level " << node_level << std::endl;
+    }
 }
 
 template <class E>
 int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_index, int * node_level) const {
-    //TODO Fill this up
+    // If we are trying to insert at the end of the PMA
+    if (index == store.size()) {
+        index = store.size() - 1;
+    }
+
+    int level = -1, start = index, end = index, sz = 1, count = 1;
+    bool found = false;
+    do {
+        // Get the boundaries of the next interval
+        int left = start - (start % sz);
+        int right = start + (sz - (start % sz)-1);
+
+        // Count only the necessary parts
+        for(int i = left; i < start; i++)
+            count++;
+        for(int i = end + 1; i <= right; i++)
+            count++;
+        
+        start = left;
+        end = right;
+        
+        ++level;
+        std::cout << start << " " << end << " " << count << " " << is_out_of_balance(count+1, level) << " " << upper_threshold_at(level) << std::endl;
+        // Would be able to fit another element?
+        if(!is_out_of_balance(count+1, level)) {
+            found = true;
+        }
+        sz <<= 1;
+        
+    } while(sz <= store.size());
+    if(!found) {
+        // We did not find a balanced interval
+        *node_index = *node_level = -1;
+        return -1;
+    }
+
+    *node_index = start;
+    *node_level = level;
+    return 1;
 }
+
+template <class E>
+void PackedMemoryArray<E>::expand_PMA(E e) {
+    // Create a new store
+    std::vector<E> new_store;
+    new_store.resize(store.size() * 2);
+    std::vector<E> new_exists_bitmask;
+    new_exists_bitmask.resize((int)ceil((s+1)*1.0/(8*sizeof(int))));
+    
+    int count = 0, i;
+    // Insert all elements less than e
+    for(i = 0; i < store.size(); i++) 
+        if(elem_exists_at(i)) {
+            if(store[i] > e)
+                break;
+            new_exists_bitmask[count/(8*sizeof(int))] |= (1<<(count % (8*sizeof(int))));
+            new_store[count++] = store[i];
+        }
+    
+    // Insert the element we wanted
+    new_exists_bitmask[count/(8*sizeof(int))] |= (1<<(count % (8*sizeof(int))));
+    new_store[count++] = e;
+    
+    // Insert rest of the elements
+    for(; i < store.size(); i++) 
+        if(elem_exists_at(i)) {
+            new_exists_bitmask[count/(8*sizeof(int))] |= (1<<(count % (8*sizeof(int))));
+            new_store[count++] = store[i];
+        }
+
+    // Replace the existing store and bitmask
+    store = new_store;
+    exists_bitmask = new_exists_bitmask;
+ 
+    // Increment the number of elements in the PMA
+    s++;
+
+    // Increment the levels in the PMA
+    l++;
+    
+    // Now rebalance the entire PMA 
+    // rebalance(0, l);
+}
+
+/*
+void print_intervals(int i, int n) {
+    assert(!(n & (n-1)));
+    int sz = 1;
+    do {
+        if(i % sz == 0)
+            std::cout << i << " " << i + (sz - 1) << std::endl;
+        else {
+            std::cout << i - (i%sz) << " " << i + (sz - (i%sz)- 1) << std::endl;
+        }
+        sz <<= 1;
+    } while(sz <= n);
+}*/
 
 int main() {
     int e = 3;
     PackedMemoryArray<int> pma(e);
     pma.print();
-    pma.insert_element_at(4, 1);
+    pma.insert_element_after(4, 3);
+    pma.print();
+    //print_intervals(63, 128);
+    pma.insert_element_after(5, 4);
+    pma.print();
+    pma.insert_element_after(6, 5);
+    pma.print();
+    pma.insert_element_after(7, 6);
     pma.print();
 }
