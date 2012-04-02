@@ -15,7 +15,7 @@ class PackedMemoryArray {
     // Upper thresholds for the level 0, and level l
     double T_0, T_l;
     // The space requirement for n elements would be cn
-    double c;
+    int c;
     // Number of levels = l+1
     int l;
 
