@@ -3,8 +3,8 @@
 #include <cassert>
 
 #define DEFAULT_C 2
-#define DEFAULT_T_O 0.5
-#define DEFAULT_T_L 1.0
+#define DEFAULT_T_L 0.5
+#define DEFAULT_T_0 1.0
 
 template <class E> 
 class PackedMemoryArray {
@@ -33,7 +33,7 @@ class PackedMemoryArray {
     //      bool delete_elem(int index);
     
     // Return the element at index 'index'
-    E elem_at(int index);
+    E elem_at(int index) const;
     // Does an element exist at position index?
     bool elem_exists_at(int index) const;
     // Capacity at level 'level'
@@ -76,8 +76,16 @@ bool PackedMemoryArray<E>::is_out_of_balance(int n_elems, int level) const {
    return ((int)floor(upper_threshold_at(level) * capacity_at(level)) > n_elems);
 }
 
+template <class E>
+E PackedMemoryArray<E>::elem_at(int index) const {
+    assert(elem_exists_at(index));
+    return store[index];
+}
 
-
+template <class E>
+PackedMemoryArray<E>::PackedMemoryArray(E e) {
+    
+}
 
 int main() {
 }
