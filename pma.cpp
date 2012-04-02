@@ -171,6 +171,7 @@ int PackedMemoryArray<E>::find(E e) const {
                 return i;
             else if(store[i] > e)
                 return -1;
+        }
     }
     return -1;
 }
