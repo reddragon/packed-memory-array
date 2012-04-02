@@ -41,11 +41,13 @@ class PackedMemoryArray {
     // TODO Delete the element at index 'index'
     //      Support this later.
     //      bool delete_elem(int index);
-    
+
     // Return the element at index 'index'
     E elem_at(int index) const;
     // Does an element exist at position index?
     bool elem_exists_at(int index) const;
+    // Find the location of element 'e'
+    int find(E e) const;
     // Capacity at level 'level'
     uint32 capacity_at(int level) const;
     // Size of the PMA
@@ -66,6 +68,8 @@ class PackedMemoryArray {
     void rebalance(int node_n, int level);
     // Return the threshold at 'level'
     double upper_threshold_at(int level) const;
+    // Find the smallest interval encompassing index 'index' which is not out of balance
+    int smallest_interval_in_balance(int index, int * node_index, int * node_level) const;
 };
 
 template <class E>
@@ -158,8 +162,44 @@ void PackedMemoryArray<E>::insert_element_at(E e, int index) {
     ++s;
 }
 
+template <class E>
+int PackedMemoryArray<E>::find(E e) const {
+    // TODO Make this binary search
+    for(int i = 0; i < store.size(); i++) {
+        if(elem_exists_at(i)) {
+            if(store[i] == e)
+                return i;
+            else if(store[i] > e)
+                return -1;
+    }
+    return -1;
+}
+
+template <class E>
+void PackedMemoryArray<E>::insert_element_after(E e, E after) {
+    // Find where we can insert
+    int loc = find(after);
+    assert(loc != -1);
+    int insert_at = ++loc;
+    // Do we have space at the location we want to insert?
+    if(insert_at < store.size() && !elem_exists_at(insert_at)) {
+        // Great! Now insert it there.
+        insert_element_at(e, insert_at);
+        return;
+    }
+    // The not so nice part begins here.
+    // TODO Put the search for rebalance logic here
+}
+
+template <class E>
+int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_index, int * node_level) const {
+    //TODO Fill this up
+}
+
 int main() {
     int e = 3;
     PackedMemoryArray<int> pma(e);
+    pma.print();
+    pma.insert_element_at(4, 1);
     pma.print();
 }
