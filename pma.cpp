@@ -1,4 +1,4 @@
-#include <cstdio>
+#include <iostream>
 #include <vector>
 #include <cassert>
 #include <cmath>
@@ -34,8 +34,10 @@ class PackedMemoryArray {
     ~PackedMemoryArray();
 
     // Insert after the element elem
-    void insert_elem(E elem);
-    
+    void insert_element_after(E e, E after);
+    // Insert at index
+    void insert_element_at(E e, int index);
+
     // TODO Delete the element at index 'index'
     //      Support this later.
     //      bool delete_elem(int index);
@@ -48,6 +50,8 @@ class PackedMemoryArray {
     uint32 capacity_at(int level) const;
     // Size of the PMA
     uint32 size() const;
+    // Actual size of the store
+    uint32 store_size() const;
     // Print the PMA
     void print() const;
 
@@ -62,8 +66,6 @@ class PackedMemoryArray {
     void rebalance(int node_n, int level);
     // Return the threshold at 'level'
     double upper_threshold_at(int level) const;
-    // Put element e at index 'index'
-    void put_element_at(E e, int index);
 };
 
 template <class E>
@@ -102,6 +104,11 @@ uint32 PackedMemoryArray<E>::size() const {
 }
 
 template <class E>
+uint32 PackedMemoryArray<E>::store_size() const {
+    return (uint32)(store.size());
+}
+
+template <class E>
 uint32 PackedMemoryArray<E>::capacity_at(int level) const {
     return 1<<level;
 }
@@ -114,10 +121,9 @@ PackedMemoryArray<E>::PackedMemoryArray(E e) : c(VAL_C), t_0(VAL_T_0), t_l(VAL_T
     store.resize(c*1);
     // Resize the bitmask as well
     exists_bitmask.resize((size_t)ceil((c*1)*1.0/(8*sizeof(int))));
-    put_element_at(e, 0);
+    insert_element_at(e, 0);
     // One liner log2 since c is a power of 2 :-P
     l = __builtin_popcount(c-1);
-    s = 1;
     // Now assert that the upper thresholds are sane, and you do not go out of balance the very first time.
     assert(!is_too_full());
     // And we have set this thing in motion. Pray!
@@ -129,18 +135,31 @@ PackedMemoryArray<E>::~PackedMemoryArray() {
 
 template <class E>
 void PackedMemoryArray<E>::print() const {
+    for (int i = 0; i < store_size(); i++) {
+        if(!elem_exists_at(i))
+            std::cerr << "-- ";
+        else
+            std::cerr << store[i] << " ";
+    }
+    std::cerr << std::endl;
 }
 
 template <class E>
-void PackedMemoryArray<E>::put_element_at(E e, int index) {
+void PackedMemoryArray<E>::insert_element_at(E e, int index) {
     // There is no element at index 'index'
     assert(!elem_exists_at(index));
+    // Actually putting the element
     store[index] = e;
+    // Marking the entry in the bitmask
     exists_bitmask[index/(8*sizeof(int))] |= (1<<(index % (8*sizeof(int))));
+    // The bitmask works fine
     assert(elem_exists_at(index));
+    // Increase the size
+    ++s;
 }
 
 int main() {
     int e = 3;
     PackedMemoryArray<int> pma(e);
+    pma.print();
 }
