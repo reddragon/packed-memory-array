@@ -48,6 +48,8 @@ class PackedMemoryArray {
     uint32 capacity_at(int level) const;
     // Size of the PMA
     uint32 size() const;
+    // Print the PMA
+    void print() const;
 
     private:
     // Is the current PMA too full?
@@ -60,6 +62,8 @@ class PackedMemoryArray {
     void rebalance(int node_n, int level);
     // Return the threshold at 'level'
     double upper_threshold_at(int level) const;
+    // Put element e at index 'index'
+    void put_element_at(E e, int index);
 };
 
 template <class E>
@@ -71,7 +75,7 @@ double PackedMemoryArray<E>::upper_threshold_at(int level) const {
 template <class E>
 bool PackedMemoryArray<E>::elem_exists_at(int index) const {
     assert(index < (sizeof(int)*exists_bitmask.size()));
-    return (exists_bitmask[index/sizeof(int)] & (1<<(index % sizeof(int))));
+    return (exists_bitmask[index/(8*sizeof(int))] & (1<<(index % (8*sizeof(int)))));
 }
 
 template <class E>
@@ -108,7 +112,9 @@ PackedMemoryArray<E>::PackedMemoryArray(E e) : c(VAL_C), t_0(VAL_T_0), t_l(VAL_T
     assert(c > 1 && !(c & (c-1)));
     // Get the new store
     store.resize(c*1);
-    store[0] = e; 
+    // Resize the bitmask as well
+    exists_bitmask.resize((size_t)ceil((c*1)*1.0/(8*sizeof(int))));
+    put_element_at(e, 0);
     // One liner log2 since c is a power of 2 :-P
     l = __builtin_popcount(c-1);
     s = 1;
@@ -119,6 +125,19 @@ PackedMemoryArray<E>::PackedMemoryArray(E e) : c(VAL_C), t_0(VAL_T_0), t_l(VAL_T
 
 template <class E>
 PackedMemoryArray<E>::~PackedMemoryArray() {
+}
+
+template <class E>
+void PackedMemoryArray<E>::print() const {
+}
+
+template <class E>
+void PackedMemoryArray<E>::put_element_at(E e, int index) {
+    // There is no element at index 'index'
+    assert(!elem_exists_at(index));
+    store[index] = e;
+    exists_bitmask[index/(8*sizeof(int))] |= (1<<(index % (8*sizeof(int))));
+    assert(elem_exists_at(index));
 }
 
 int main() {
