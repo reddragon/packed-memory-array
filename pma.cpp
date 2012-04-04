@@ -37,10 +37,11 @@ class PackedMemoryArray {
     void insert_element_after(E e, E after);
     // Insert at index
     void insert_element_at(E e, int index);
-
+    
     // TODO Delete the element at index 'index'
     //      Support this later.
     //      bool delete_elem(int index);
+    void delete_element_at(int index);
 
     // Return the element at index 'index'
     E elem_at(int index) const;
@@ -141,7 +142,7 @@ PackedMemoryArray<E>::~PackedMemoryArray() {
 
 template <class E>
 void PackedMemoryArray<E>::print() const {
-    std::cout << s << " " << store_size() << " " << exists_bitmask.size() << std::endl;
+    //std::cout << s << " " << store_size() << " " << exists_bitmask.size() << std::endl;
     for (int i = 0; i < store_size(); i++) {
         if(!elem_exists_at(i))
             std::cerr << "-- ";
@@ -181,6 +182,7 @@ int PackedMemoryArray<E>::find(E e) const {
 
 template <class E>
 void PackedMemoryArray<E>::insert_element_after(E e, E after) {
+    std::cout << "Inserting " << e << " after " << after << std::endl;
     // Find where we can insert
     int loc = find(after);
     assert(loc != -1);
@@ -198,6 +200,7 @@ void PackedMemoryArray<E>::insert_element_after(E e, E after) {
         // No more space left in the PMA. Resize!
         std::cout << "Need to expand the PMA" << std::endl;
         expand_PMA(e);
+        //insert_element_after(e, after);
     }
     else {
         // Rebalance one particular level
@@ -288,7 +291,54 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
     l++;
     
     // Now rebalance the entire PMA 
-    // rebalance(0, l);
+    std::cout << "Now rebalancing the entire PMA" << std::endl;
+    rebalance(0, l);
+}
+
+template<class E>
+void PackedMemoryArray<E>::rebalance(int index, int level) {
+    assert(level <= l);
+    int c = capacity_at(level);
+    // Move all the elements to one side
+    int last = index + c - 1, count = 0;
+    for(int i = index + c - 1; i >= 0; i--) {
+        if(elem_exists_at(i)) {
+            // Copy the element to the leftmost position
+            insert_element_at(store[i], last);
+            // Delete the original copy of the element
+            delete_element_at(i);
+            // Update the leftmost pointer, and count of elements moved
+            --last;
+            count++;
+        }
+    }
+
+    std::cout << "After moving to one side: " << std::endl;
+    print();
+     
+    // Now copy
+    double k = (c*1.0)/count, p = 0;
+    int actual_index = last, correct_index;
+    for(int i = 0; i < count; i++) {
+        p += k;
+        std::cout << p << std::endl;
+        actual_index++;
+        // Now insert the element at the right position
+        correct_index = index + (int)p - 1;
+        std::cout << "Add at " << correct_index << " and remove from " << actual_index << std::endl;
+        if (correct_index == actual_index)
+            continue;
+        insert_element_at(store[actual_index], correct_index);
+        // Remove the left most copy
+        delete_element_at(actual_index);
+    } 
+}
+
+template <class E>
+void PackedMemoryArray<E>::delete_element_at(int index) {
+    assert(elem_exists_at(index));
+    // Just mark it non existent
+    exists_bitmask[index/(8*sizeof(int))] ^= (1<<(index % (8*sizeof(int))));
 }
 
 /*
@@ -318,4 +368,9 @@ int main() {
     pma.print();
     pma.insert_element_after(7, 6);
     pma.print();
+    pma.insert_element_after(9, 7);
+    pma.print();
+    pma.insert_element_after(8, 7);
+    pma.print();
+
 }
