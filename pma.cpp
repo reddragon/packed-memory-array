@@ -200,11 +200,11 @@ void PackedMemoryArray<E>::insert_element_after(E e, E after) {
         // No more space left in the PMA. Resize!
         std::cout << "Need to expand the PMA" << std::endl;
         expand_PMA(e);
-        //insert_element_after(e, after);
     }
     else {
         // Rebalance one particular level
         std::cout << "Is balanced from " << node_index << " at level " << node_level << std::endl;
+        assert(false);
     }
 }
 
