@@ -159,13 +159,15 @@ PackedMemoryArray<E>::~PackedMemoryArray() {
 
 template <class E>
 void PackedMemoryArray<E>::print() const {
+    int empty = 0;
     for (int i = 0; i < store_size(); i++) {
-        if(!elem_exists_at(i))
-            std::cerr << "-- ";
+        if(!elem_exists_at(i)) 
+            std::cerr << "-- ", empty++;
         else
             std::cerr << store[i] << " ";
     }
     std::cerr << std::endl;
+    std::cerr << empty << "/" << store.size() << std::endl;
 }
 
 template <class E>
@@ -234,7 +236,7 @@ int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_ind
     do {
         // Get the boundaries of the next interval
         int left = start - (start % sz);
-        int right = start + (sz - (start % sz)-1);
+        int right = left + sz;
 
         // Count only the necessary parts
         for(int i = left; i < start; i++)
@@ -249,6 +251,7 @@ int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_ind
 
         ++level;
         bool is_balanced = !is_out_of_balance(count + 1, level);
+        std::cout << "Level: " << level << ", from " << left << " to " << right << ", having " << count+1 << ", elements, is balanced?: " << is_balanced << ", smallest_window_size: " << smallest_window_size << std::endl;
         // Would be able to fit another element?
         if(is_balanced) {
             found = true;
@@ -304,27 +307,30 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
     // Increment the number of elements in the PMA
     s++;
     
+    std::cout << "Old smallest window size: " << smallest_window_size << std::endl;
     // Recalculate l and smallest_window_size
     int log2n = __builtin_popcount(store.size()-1);
     if(log2n & (log2n-1)) {
         // log2n is not a power of 2, round it up to the nearest power of 2.
-        smallest_window_size = (int)floor(log2(1<<(log2n+1)));
+        smallest_window_size = 1<<((int)floor(log2(log2n<<1)));
     }
     else {
         // log2n is a power of 2, so, all is fine.
-        smallest_window_size = log2n;
+        smallest_window_size = 1<<log2n;
     }
     l = log2n - log2(smallest_window_size);
-    
+    std::cout << "New smallest window size: " << smallest_window_size << std::endl;
+
     // Now rebalance the entire PMA 
     rebalance(0, l);
 }
 
 template<class E>
 void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
+    std::cout << "Rebalance at level " << level << " " << capacity_at(level) << std::endl;
     assert(level <= l);
     int c = capacity_at(level);
-    print();
+    //print();
     // Move all the elements to one side
     int last = index + c - 1, count = 0;
     bool element_inserted = false;
@@ -399,21 +405,76 @@ void PackedMemoryArray<E>::delete_element_at(int index) {
 }
 
 int main() {
-    int e = 3;
-    PackedMemoryArray<int> pma(e);
+    float e = 3;
+    PackedMemoryArray<float> pma(e);
+    
     pma.print();
     pma.insert_element_after(4, 3);
     pma.print();
-    
-    //print_intervals(63, 128);
     pma.insert_element_after(5, 4);
     pma.print();
-    pma.insert_element_after(6, 5);
+    pma.insert_element_after(4, 3);
     pma.print();
-    pma.insert_element_after(7, 6);
+    pma.insert_element_after(4, 3);
     pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(3.5, 3);
+    pma.print();
+    pma.insert_element_after(3.6, 3.5);
+    pma.print();
+    pma.insert_element_after(3.7, 3.6);
+    pma.print();
+    pma.insert_element_after(3.8, 3.7);
+    pma.print();
+    pma.insert_element_after(5.2, 5);
+    pma.print();
+    pma.insert_element_after(5.3, 5.2);
+    pma.print();
+    pma.insert_element_after(3.65, 3.6);
+    pma.print();
+
+
+
+
+
+
+
+    /*
     pma.insert_element_after(9, 7);
     pma.print();
     pma.insert_element_after(8, 7);
     pma.print(); 
+    pma.insert_element_after(6, 5);
+    pma.print();
+    pma.insert_element_after(9, 8);
+    pma.print();
+    pma.insert_element_after(9, 8);
+    pma.print();
+    pma.insert_element_after(9, 8);
+    pma.print();
+    pma.insert_element_after(5, 4);
+    pma.print();
+    pma.insert_element_after(5, 4);
+    pma.print();
+    pma.insert_element_after(5, 4);
+    pma.print();
+
+ 
+    pma.insert_element_after(5, 4);
+    pma.print();
+    */
 }
+
