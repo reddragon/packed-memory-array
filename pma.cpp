@@ -9,6 +9,7 @@
 #define VAL_T_0 1.0
 #define ELEM_EXISTS_AT(i) exists[i]
 #define OPTIMIZE 1 
+#define CAPACITY_AT(l) ((int)(segment_size<<l))
 // WARNING
 
 typedef unsigned int uint32;
@@ -111,7 +112,7 @@ bool PackedMemoryArray<E>::is_too_full() const {
 template <class E>
 bool PackedMemoryArray<E>::is_out_of_balance(int n_elems, int level) const {
    // TODO Will change when we get lower thresholds
-   return ((int)floor(upper_threshold_at(level) * capacity_at(level)) < n_elems);
+   return ((int)floor(upper_threshold_at(level) * CAPACITY_AT(level)) < n_elems);
 }
 
 template <class E>
@@ -187,7 +188,7 @@ void PackedMemoryArray<E>::print() const {
 }
 
 template <class E>
-void PackedMemoryArray<E>::insert_element_at(E e, int index) {
+inline void PackedMemoryArray<E>::insert_element_at(E e, int index) {
     // There is no element at index 'index'
 #ifndef OPTIMIZE
     assert(!ELEM_EXISTS_AT(index));
@@ -383,7 +384,7 @@ void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
 #ifndef OPTIMZE
     assert(level <= l);
 #endif
-    int c = capacity_at(level);
+    int c = CAPACITY_AT(level);
     // Move all the elements to one side
     int last = index + c - 1, count = 0;
     bool element_inserted = false;
@@ -421,7 +422,7 @@ void PackedMemoryArray<E>::rebalance(int index, int level) {
 #ifndef OPTIMIZE 
     assert(level <= l);
 #endif
-    int c = capacity_at(level);
+    int c = CAPACITY_AT(level);
     // Move all the elements to one side
     int last = index + c - 1, count = 0;
     for(int i = last; i >= index; i--) {
@@ -476,7 +477,7 @@ int main() {
     
     PackedMemoryArray<int> pma(2);
 
-    for(int i = 3; i < 10000; i++) {
+    for(int i = 3; i < 100000; i++) {
         pma.insert_element(i);
     }
     //pma.print();
