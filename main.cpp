@@ -172,10 +172,12 @@ struct PMA {
     }
 
     int
-    lb_in_chunk(int l, int v) {
+    lb_in_chunk(int l, int v, int &sz) {
         int i;
+        sz = 0;
         for (i = l; i < l + chunk_size; ++i) {
             if (this->present[i]) {
+                ++sz;
                 if (this->impl[i] >= v) {
                     return i;
                 }
@@ -201,11 +203,9 @@ struct PMA {
             int m;
             while (l != r) {
                 m = l + (r-l)/2;
-                int left = left_interval_boundary(m * chunk_size, chunk_size);
-                int pos = lb_in_chunk(left, v);
-                bool in_limit;
                 int sz;
-                get_interval_stats(m * chunk_size, 0, in_limit, sz);
+                int left = left_interval_boundary(m * chunk_size, chunk_size);
+                int pos = lb_in_chunk(left, v, sz);
                 if (pos == left + chunk_size && sz > 0) {
                     // Move to right half
                     l = m + 1;
@@ -379,7 +379,7 @@ main() {
     p1.insert(90);
     p1.print();
 
-    assert(is_sorted(p1.begin(), p1.end()));
+    // assert(is_sorted(p1.begin(), p1.end()));
 
     // return 0;
     p1.insert(65);
@@ -413,12 +413,12 @@ main() {
     p1.print();
 
     vi_t v;
-    for (int i = 0; i < 150000; ++i) {
+    for (int i = 0; i < 10000000; ++i) {
         p1.insert(150000 - i);
         // v.insert(v.begin(), 100000 - i);
     }
     printf("%d moves to insert %d elements\n", nmoves, p1.size());
 
-    assert(is_sorted(p1.begin(), p1.end()));
+    // assert(is_sorted(p1.begin(), p1.end()));
 
 }
