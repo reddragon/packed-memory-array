@@ -38,9 +38,12 @@ class PackedMemoryArray {
     PackedMemoryArray(std::vector<E> v);
     ~PackedMemoryArray();
 
+    int upper_bound_in_segment(E e, int v);
+    int upper_bound(E e);
+    // A generic insert
     void insert_element(E e);
     // Insert after the element elem
-    void insert_element_after(E e, E after);
+    void insert_element_after(E e, E after, int pos = -1);
     // Insert at index
     void insert_element_at(E e, int index);
     
@@ -200,9 +203,10 @@ int PackedMemoryArray<E>::find(E e) const {
 }
 
 template <class E>
-void PackedMemoryArray<E>::insert_element_after(E e, E after) {
+void PackedMemoryArray<E>::insert_element_after(E e, E after, int pos) {
     // Find where we can insert
     int loc = find(after);
+    loc = pos;
     assert(loc != -1);
     int insert_at = ++loc;
     // Do we have space at the location we want to insert?
@@ -224,8 +228,33 @@ void PackedMemoryArray<E>::insert_element_after(E e, E after) {
 }
 
 template <class E>
-void PackedMemoryArray<E>::insert(E e) {
-    
+int PackedMemoryArray<E>::upper_bound_in_segment(E e, int v) {
+    int best = -1;
+    for(int i = v*segment_size; i < (v+1)*segment_size; i++)
+        if(elem_exists_at(i) && store[i] <= e) 
+            return best = i;
+    return best;
+}
+
+template <class E>
+int PackedMemoryArray<E>::upper_bound(E e) {
+    int l = 0, r = ((int)store.size())/segment_size, pos; 
+    while(l != r) {
+        int m = l + (r - l + 1)/2;
+        pos = upper_bound_in_segment(e, m);
+        if (pos == -1) 
+            r = m-1;
+        else
+            l = m; 
+    }
+    pos = upper_bound_in_segment(e, l);
+    return pos;
+}
+
+template <class E>
+void PackedMemoryArray<E>::insert_element(E e) {
+    int pos = upper_bound(e);
+    insert_element_after(e, store[pos], pos);
 }
 
 template <class E>
@@ -333,10 +362,8 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
 
 template<class E>
 void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
-    // std::cout << "Rebalance at level " << level << " " << capacity_at(level) << std::endl;
     assert(level <= l);
     int c = capacity_at(level);
-    //print();
     // Move all the elements to one side
     int last = index + c - 1, count = 0;
     bool element_inserted = false;
@@ -353,7 +380,10 @@ void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
             count++;
         }
     }
-    
+
+    if(!element_inserted)
+        level_copy.push_back(e);
+
     // Now copy
     double k = (c*1.0)/(level_copy.size()), p = 0;
     int actual_index = 0, correct_index;
@@ -411,11 +441,12 @@ void PackedMemoryArray<E>::delete_element_at(int index) {
 }
 
 int main() {
+    
     PackedMemoryArray<int> pma(2);
 
-    for(int i = 3; i < 20; i++)
-        pma.insert_element_after(i, i-1);
-
+    for(int i = 3; i < 1000; i++) {
+        pma.insert_element(i);
+    }
     pma.print();
     
     /*
@@ -460,7 +491,30 @@ int main() {
     pma.insert_element_after(3.65, 3.6);
     pma.print();
     */
+    /*
+    float e = 3;
+    PackedMemoryArray<float> pma(e);
     
+    pma.insert_element(4);
+    pma.insert_element(5);
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(4); 
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(3.5);
+    pma.insert_element(3.6);
+    pma.insert_element(3.7);
+    pma.insert_element(3.8);
+    pma.insert_element(5.2);
+    pma.insert_element(5.3);
+    pma.insert_element(3.65); 
+    pma.print();
 
+    */
 }
 
