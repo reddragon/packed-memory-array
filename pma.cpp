@@ -221,7 +221,7 @@ int PackedMemoryArray<E>::find(E e) const {
 template <class E>
 void PackedMemoryArray<E>::insert_element_after(E e, E after, int pos) {
     // Find where we can insert
-    int loc = find(after);
+    int loc;
     loc = pos;
 #ifndef OPTIMIZE
     assert(loc != -1);
