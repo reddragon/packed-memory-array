@@ -26,9 +26,9 @@ class PackedMemoryArray {
     int l;
     // Number of elements in the PMA (the size)
     uint32 s;
-    // Smallest window size
+    // Segment size
     // Basically round up log2(n) to a power of 2
-    int smallest_window_size;
+    int segment_size;
     // Total number of moves
     int total_moves;
 
@@ -38,6 +38,7 @@ class PackedMemoryArray {
     PackedMemoryArray(std::vector<E> v);
     ~PackedMemoryArray();
 
+    void insert_element(E e);
     // Insert after the element elem
     void insert_element_after(E e, E after);
     // Insert at index
@@ -122,7 +123,7 @@ uint32 PackedMemoryArray<E>::store_size() const {
 
 template <class E>
 uint32 PackedMemoryArray<E>::capacity_at(int level) const {
-    return smallest_window_size << level;
+    return segment_size << level;
 }
 
 template <class E>
@@ -140,13 +141,13 @@ PackedMemoryArray<E>::PackedMemoryArray(E e) : c(VAL_C), t_0(VAL_T_0), t_l(VAL_T
     int log2n = __builtin_popcount(store.size()-1);
     if(log2n & (log2n-1)) {
         // log2n is not a power of 2, round it up to the nearest power of 2.
-        smallest_window_size = (int)floor(log2(1<<(log2n+1)));
+        segment_size = (int)floor(log2(1<<(log2n+1)));
     }
     else {
         // log2n is a power of 2, so, all is fine.
-        smallest_window_size = log2n;
+        segment_size = log2n;
     }
-    l = log2n - log2(smallest_window_size);
+    l = log2n - log2(segment_size);
 
     // Now assert that the upper thresholds are sane, and you do not go out of balance the very first time.
     assert(!is_too_full());
@@ -223,6 +224,11 @@ void PackedMemoryArray<E>::insert_element_after(E e, E after) {
 }
 
 template <class E>
+void PackedMemoryArray<E>::insert(E e) {
+    
+}
+
+template <class E>
 int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_index, int * node_level) const {
     // If we are trying to insert at the end of the PMA
     if (index == store.size()) {
@@ -231,7 +237,7 @@ int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_ind
 
     int level = -1;
     int start = index;
-    int end = index, sz = smallest_window_size, count = 1;
+    int end = index, sz = segment_size, count = 1;
     bool found = false;
     do {
         // Get the boundaries of the next interval
@@ -251,7 +257,7 @@ int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_ind
 
         ++level;
         bool is_balanced = !is_out_of_balance(count + 1, level);
-        std::cout << "Level: " << level << ", from " << left << " to " << right << ", having " << count+1 << ", elements, is balanced?: " << is_balanced << ", smallest_window_size: " << smallest_window_size << std::endl;
+        // std::cout << "Level: " << level << ", from " << left << " to " << right << ", having " << count+1 << ", elements, is balanced?: " << is_balanced << ", segment_size: " << smallest_window_size << std::endl;
         // Would be able to fit another element?
         if(is_balanced) {
             found = true;
@@ -307,19 +313,19 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
     // Increment the number of elements in the PMA
     s++;
     
-    std::cout << "Old smallest window size: " << smallest_window_size << std::endl;
-    // Recalculate l and smallest_window_size
+    // std::cout << "Old smallest window size: " << segment_size << std::endl;
+    // Recalculate l and segment_size
     int log2n = __builtin_popcount(store.size()-1);
     if(log2n & (log2n-1)) {
         // log2n is not a power of 2, round it up to the nearest power of 2.
-        smallest_window_size = 1<<((int)floor(log2(log2n<<1)));
+        segment_size = 1<<((int)floor(log2(log2n<<1)));
     }
     else {
         // log2n is a power of 2, so, all is fine.
-        smallest_window_size = 1<<log2n;
+        segment_size = 1<<log2n;
     }
-    l = log2n - log2(smallest_window_size);
-    std::cout << "New smallest window size: " << smallest_window_size << std::endl;
+    l = log2n - log2(segment_size);
+    // std::cout << "New smallest window size: " << segment_size << std::endl;
 
     // Now rebalance the entire PMA 
     rebalance(0, l);
@@ -327,7 +333,7 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
 
 template<class E>
 void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
-    std::cout << "Rebalance at level " << level << " " << capacity_at(level) << std::endl;
+    // std::cout << "Rebalance at level " << level << " " << capacity_at(level) << std::endl;
     assert(level <= l);
     int c = capacity_at(level);
     //print();
@@ -405,6 +411,14 @@ void PackedMemoryArray<E>::delete_element_at(int index) {
 }
 
 int main() {
+    PackedMemoryArray<int> pma(2);
+
+    for(int i = 3; i < 20; i++)
+        pma.insert_element_after(i, i-1);
+
+    pma.print();
+    
+    /*
     float e = 3;
     PackedMemoryArray<float> pma(e);
     
@@ -445,36 +459,8 @@ int main() {
     pma.print();
     pma.insert_element_after(3.65, 3.6);
     pma.print();
-
-
-
-
-
-
-
-    /*
-    pma.insert_element_after(9, 7);
-    pma.print();
-    pma.insert_element_after(8, 7);
-    pma.print(); 
-    pma.insert_element_after(6, 5);
-    pma.print();
-    pma.insert_element_after(9, 8);
-    pma.print();
-    pma.insert_element_after(9, 8);
-    pma.print();
-    pma.insert_element_after(9, 8);
-    pma.print();
-    pma.insert_element_after(5, 4);
-    pma.print();
-    pma.insert_element_after(5, 4);
-    pma.print();
-    pma.insert_element_after(5, 4);
-    pma.print();
-
- 
-    pma.insert_element_after(5, 4);
-    pma.print();
     */
+    
+
 }
 
