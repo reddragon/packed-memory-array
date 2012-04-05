@@ -29,6 +29,8 @@ class PackedMemoryArray {
     // Smallest window size
     // Basically round up log2(n) to a power of 2
     int smallest_window_size;
+    // Total number of moves
+    int total_moves;
 
     public:
     PackedMemoryArray();
@@ -99,7 +101,6 @@ bool PackedMemoryArray<E>::is_too_full() const {
 template <class E>
 bool PackedMemoryArray<E>::is_out_of_balance(int n_elems, int level) const {
    // TODO Will change when we get lower thresholds
-   std::cout << "Max capacity at level " << level << ": " << (int)floor(upper_threshold_at(level) * capacity_at(level))  << ", and it currently has, " << n_elems << " elements " << std::endl;
    return ((int)floor(upper_threshold_at(level) * capacity_at(level)) < n_elems);
 }
 
@@ -146,7 +147,6 @@ PackedMemoryArray<E>::PackedMemoryArray(E e) : c(VAL_C), t_0(VAL_T_0), t_l(VAL_T
         smallest_window_size = log2n;
     }
     l = log2n - log2(smallest_window_size);
-    std::cout << "store.size(): " << store.size() << " l: " << l << " smallest_window_size: " << smallest_window_size << std::endl;
 
     // Now assert that the upper thresholds are sane, and you do not go out of balance the very first time.
     assert(!is_too_full());
@@ -159,7 +159,6 @@ PackedMemoryArray<E>::~PackedMemoryArray() {
 
 template <class E>
 void PackedMemoryArray<E>::print() const {
-    //std::cout << s << " " << store_size() << " " << exists_bitmask.size() << std::endl;
     for (int i = 0; i < store_size(); i++) {
         if(!elem_exists_at(i))
             std::cerr << "-- ";
@@ -171,7 +170,6 @@ void PackedMemoryArray<E>::print() const {
 
 template <class E>
 void PackedMemoryArray<E>::insert_element_at(E e, int index) {
-    std::cout << "Inserting " << e << " at index " << index << std::endl;
     // There is no element at index 'index'
     assert(!elem_exists_at(index));
     // Actually putting the element
@@ -200,7 +198,6 @@ int PackedMemoryArray<E>::find(E e) const {
 
 template <class E>
 void PackedMemoryArray<E>::insert_element_after(E e, E after) {
-    std::cout << "Inserting " << e << " after " << after << std::endl;
     // Find where we can insert
     int loc = find(after);
     assert(loc != -1);
@@ -212,16 +209,13 @@ void PackedMemoryArray<E>::insert_element_after(E e, E after) {
         return;
     }
     // The not so nice part begins here.
-    // TODO Put the search for rebalance logic here
     int node_index, node_level;
     if(smallest_interval_in_balance(insert_at, &node_index, &node_level) == -1) {
         // No more space left in the PMA. Resize!
-        std::cout << "Need to expand the PMA" << std::endl;
         expand_PMA(e);
     }
     else {
         // Rebalance one particular level
-        std::cout << "Is balanced from " << node_index << " at level " << node_level << std::endl;
         rebalance(node_index, node_level, e);
     }
 }
@@ -233,8 +227,6 @@ int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_ind
         index = store.size() - 1;
     }
 
-    std::cout << "Checking for the smallest interval in balance from index: " << index << std::endl;
-    
     int level = -1;
     int start = index;
     int end = index, sz = smallest_window_size, count = 1;
@@ -257,7 +249,6 @@ int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_ind
 
         ++level;
         bool is_balanced = !is_out_of_balance(count + 1, level);
-        std::cout << "Starting from: " << start << " to " << end << " we have, " << count << " elements, and it will be balanced after insert?: " << is_balanced << ". The upper threshold: " << upper_threshold_at(level) << " " << left << " " << right << std::endl;
         // Would be able to fit another element?
         if(is_balanced) {
             found = true;
@@ -324,10 +315,8 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
         smallest_window_size = log2n;
     }
     l = log2n - log2(smallest_window_size);
-    std::cout << "store.size(): " << store.size() << " l: " << l << " smallest_window_size: " << smallest_window_size << std::endl;
     
     // Now rebalance the entire PMA 
-    std::cout << "Now rebalancing the entire PMA" << std::endl;
     rebalance(0, l);
 }
 
@@ -339,7 +328,6 @@ void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
     // Move all the elements to one side
     int last = index + c - 1, count = 0;
     bool element_inserted = false;
-    std::cout << "Rebalance from " << index << " to " << last << std::endl;
     std::vector<E> level_copy;
     for(int i = last; i >= index; i--) {
         if(elem_exists_at(i)) {
@@ -354,17 +342,11 @@ void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
         }
     }
     
-    std::cout << "Level Copy Size: " << level_copy.size() << std::endl;
-    for(int i = level_copy.size() - 1; i >= 0; i--) 
-        std::cout << level_copy[i] << " ";
-    std::cout << std::endl;
-     
     // Now copy
     double k = (c*1.0)/(level_copy.size()), p = 0;
     int actual_index = 0, correct_index;
     for(int i = level_copy.size()-1; i >= 0; i--) {
         p += k;
-        std::cout << p << std::endl;
         // Now insert the element at the right position
         correct_index = index + (int)p - 1;
         insert_element_at(level_copy[i], correct_index);
@@ -376,13 +358,10 @@ template<class E>
 void PackedMemoryArray<E>::rebalance(int index, int level) {
     assert(level <= l);
     int c = capacity_at(level);
-    print();
     // Move all the elements to one side
     int last = index + c - 1, count = 0;
-    std::cout << "Rebalance from " << index << " to " << last << std::endl;
     for(int i = last; i >= index; i--) {
         if(elem_exists_at(i)) {
-            std::cout << store[i] << " " << last << std::endl;
             if(i != last) {
                 // Copy the element to the leftmost position
                 insert_element_at(store[i], last);
@@ -395,19 +374,14 @@ void PackedMemoryArray<E>::rebalance(int index, int level) {
         }
     }
 
-    std::cout << "After moving to one side: " << std::endl;
-    print();
-     
     // Now copy
     double k = (c*1.0)/count, p = 0;
     int actual_index = last, correct_index;
     for(int i = 0; i < count; i++) {
         p += k;
-        std::cout << p << std::endl;
         actual_index++;
         // Now insert the element at the right position
         correct_index = index + (int)p - 1;
-        std::cout << "Add at " << correct_index << " and remove from " << actual_index << std::endl;
         if (correct_index == actual_index)
             continue;
         if(actual_index != correct_index)
@@ -423,20 +397,6 @@ void PackedMemoryArray<E>::delete_element_at(int index) {
     // Just mark it non existent
     exists_bitmask[index] = 0;
 }
-
-/*
-void print_intervals(int i, int n) {
-    assert(!(n & (n-1)));
-    int sz = 1;
-    do {
-        if(i % sz == 0)
-            std::cout << i << " " << i + (sz - 1) << std::endl;
-        else {
-            std::cout << i - (i%sz) << " " << i + (sz - (i%sz)- 1) << std::endl;
-        }
-        sz <<= 1;
-    } while(sz <= n);
-}*/
 
 int main() {
     int e = 3;
