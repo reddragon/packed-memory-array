@@ -72,7 +72,7 @@ struct PMA {
 
         bool
         operator==(PMAIterator rhs) {
-            return this->pma == rhs.pma && this->i && rhs.i;
+            return this->pma == rhs.pma && this->i == rhs.i;
         }
 
         bool
@@ -154,6 +154,8 @@ struct PMA {
         this->present.swap(tmpp);
         this->init_vars(capacity);
         nmoves += this->impl.size();
+        // dprintf("After resize: ");
+        // this->print();
     }
 
     void
@@ -201,14 +203,17 @@ struct PMA {
                 m = l + (r-l)/2;
                 int left = left_interval_boundary(m * chunk_size, chunk_size);
                 int pos = lb_in_chunk(left, v);
-                if (pos == left + chunk_size) {
+                bool in_limit;
+                int sz;
+                get_interval_stats(m * chunk_size, 0, in_limit, sz);
+                if (pos == left + chunk_size && sz > 0) {
                     // Move to right half
                     l = m + 1;
                 } else {
                     r = m;
                 }
             }
-            i = l;
+            i = l * chunk_size;
 #endif
         }
         dprintf("lower_bound(%d) == %d\n", v, i);
@@ -362,18 +367,21 @@ main() {
 
     // p10.left_interval_boundary(54, 8);
 
+    p1.insert(80);
+    p1.print();
+
     p1.insert(50);
     p1.print();
 
     p1.insert(70);
     p1.print();
 
-    p1.insert(80);
-    p1.print();
-
     p1.insert(90);
     p1.print();
 
+    assert(is_sorted(p1.begin(), p1.end()));
+
+    // return 0;
     p1.insert(65);
     p1.print();
 
@@ -404,11 +412,13 @@ main() {
     p1.insert(23);
     p1.print();
 
-    for (int i = 0; i < 50000; ++i) {
-        p1.insert(rand() % 50000);
+    vi_t v;
+    for (int i = 0; i < 150000; ++i) {
+        p1.insert(150000 - i);
+        // v.insert(v.begin(), 100000 - i);
     }
     printf("%d moves to insert %d elements\n", nmoves, p1.size());
 
-    // assert(is_sorted(p1.begin(), p1.end()));
+    assert(is_sorted(p1.begin(), p1.end()));
 
 }
