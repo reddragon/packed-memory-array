@@ -271,7 +271,7 @@ int PackedMemoryArray<E>::upper_bound(E e) {
 }
 
 template <class E>
-void PackedMemoryArray<E>::insert_element(E e) {
+inline void PackedMemoryArray<E>::insert_element(E e) {
     int pos = upper_bound(e);
     insert_element_after(e, store[pos], pos);
 }
