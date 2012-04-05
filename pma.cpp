@@ -477,7 +477,7 @@ int main() {
     
     PackedMemoryArray<int> pma(2);
 
-    for(int i = 3; i < 100000; i++) {
+    for(int i = 3; i < 10000000; i++) {
         pma.insert_element(i);
     }
     //pma.print();
