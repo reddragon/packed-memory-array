@@ -7,6 +7,9 @@
 #define VAL_C 2
 #define VAL_T_L 0.5
 #define VAL_T_0 1.0
+#define ELEM_EXISTS_AT(i) exists[i]
+#define OPTIMIZE 1 
+#define CAPACITY_AT(l) ((int)(segment_size<<l))
 // WARNING
 
 typedef unsigned int uint32;
@@ -16,7 +19,7 @@ class PackedMemoryArray {
     // The actual array
     std::vector<E> store;
     // A bitmask to check if an element exists or not
-    std::vector<bool> exists_bitmask;
+    std::vector<bool> exists;
     // Upper thresholds for the level 0, and level l
     double t_0, t_l;
     // The space requirement for n elements would be cn
@@ -26,9 +29,9 @@ class PackedMemoryArray {
     int l;
     // Number of elements in the PMA (the size)
     uint32 s;
-    // Smallest window size
+    // Segment size
     // Basically round up log2(n) to a power of 2
-    int smallest_window_size;
+    int segment_size;
     // Total number of moves
     int total_moves;
 
@@ -38,8 +41,12 @@ class PackedMemoryArray {
     PackedMemoryArray(std::vector<E> v);
     ~PackedMemoryArray();
 
+    int upper_bound_in_segment(E e, int v);
+    int upper_bound(E e);
+    // A generic insert
+    void insert_element(E e);
     // Insert after the element elem
-    void insert_element_after(E e, E after);
+    void insert_element_after(E e, E after, int pos = -1);
     // Insert at index
     void insert_element_at(E e, int index);
     
@@ -82,14 +89,18 @@ class PackedMemoryArray {
 
 template <class E>
 double PackedMemoryArray<E>::upper_threshold_at(int level) const {
+#ifndef OPTIMIZE
     assert(level <= l);
+#endif
     return t_0 - ((t_0 - t_l) * 1.0 * level) / l; 
 }
 
 template <class E>
 bool PackedMemoryArray<E>::elem_exists_at(int index) const {
-    assert(index < (sizeof(int)*exists_bitmask.size()));
-    return (exists_bitmask[index]);
+#ifndef OPTIMIZE
+    assert(index < (sizeof(int)*exists.size()));
+#endif
+    return (exists[index]);
 }
 
 template <class E>
@@ -101,12 +112,14 @@ bool PackedMemoryArray<E>::is_too_full() const {
 template <class E>
 bool PackedMemoryArray<E>::is_out_of_balance(int n_elems, int level) const {
    // TODO Will change when we get lower thresholds
-   return ((int)floor(upper_threshold_at(level) * capacity_at(level)) < n_elems);
+   return ((int)floor(upper_threshold_at(level) * CAPACITY_AT(level)) < n_elems);
 }
 
 template <class E>
 E PackedMemoryArray<E>::elem_at(int index) const {
-    assert(elem_exists_at(index));
+#ifndef OPTIMIZE
+    assert(ELEM_EXISTS_AT(index));
+#endif
     return store[index];
 }
 
@@ -122,34 +135,38 @@ uint32 PackedMemoryArray<E>::store_size() const {
 
 template <class E>
 uint32 PackedMemoryArray<E>::capacity_at(int level) const {
-    return smallest_window_size << level;
+    return segment_size << level;
 }
 
 template <class E>
 PackedMemoryArray<E>::PackedMemoryArray(E e) : c(VAL_C), t_0(VAL_T_0), t_l(VAL_T_L) {
     // Assert that c is a power of 2 and > 1
+#ifndef OPTIMIZE
     assert(c > 1 && !(c & (c-1)));
+#endif
     s = 0;
     // Get the new store
     store.resize(c*1);
     // Resize the bitmask as well
-    exists_bitmask.resize((size_t)ceil(c));
+    exists.resize((size_t)ceil(c));
     insert_element_at(e, 0);
     
     // One liner log2 since c is a power of 2 :-P
     int log2n = __builtin_popcount(store.size()-1);
     if(log2n & (log2n-1)) {
         // log2n is not a power of 2, round it up to the nearest power of 2.
-        smallest_window_size = (int)floor(log2(1<<(log2n+1)));
+        segment_size = (int)floor(log2(1<<(log2n+1)));
     }
     else {
         // log2n is a power of 2, so, all is fine.
-        smallest_window_size = log2n;
+        segment_size = log2n;
     }
-    l = log2n - log2(smallest_window_size);
+    l = log2n - log2(segment_size);
 
     // Now assert that the upper thresholds are sane, and you do not go out of balance the very first time.
+#ifndef OPTIMIZE
     assert(!is_too_full());
+#endif
     // And we have set this thing in motion. Pray!
 }
 
@@ -159,25 +176,31 @@ PackedMemoryArray<E>::~PackedMemoryArray() {
 
 template <class E>
 void PackedMemoryArray<E>::print() const {
+    int empty = 0;
     for (int i = 0; i < store_size(); i++) {
-        if(!elem_exists_at(i))
-            std::cerr << "-- ";
+        if(!ELEM_EXISTS_AT(i)) 
+            std::cerr << "-- ", empty++;
         else
             std::cerr << store[i] << " ";
     }
     std::cerr << std::endl;
+    std::cerr << empty << "/" << store.size() << std::endl;
 }
 
 template <class E>
-void PackedMemoryArray<E>::insert_element_at(E e, int index) {
+inline void PackedMemoryArray<E>::insert_element_at(E e, int index) {
     // There is no element at index 'index'
-    assert(!elem_exists_at(index));
+#ifndef OPTIMIZE
+    assert(!ELEM_EXISTS_AT(index));
+#endif
     // Actually putting the element
     store[index] = e;
     // Marking the entry in the bitmask
-    exists_bitmask[index] = 1;
+    exists[index] = 1;
     // The bitmask works fine
-    assert(elem_exists_at(index));
+#ifndef OPTIMIZE
+    assert(ELEM_EXISTS_AT(index));
+#endif
     // Increase the size
     ++s;
 }
@@ -186,7 +209,7 @@ template <class E>
 int PackedMemoryArray<E>::find(E e) const {
     // TODO Make this binary search
     for(int i = 0; i < store.size(); i++) {
-        if(elem_exists_at(i)) {
+        if(ELEM_EXISTS_AT(i)) {
             if(store[i] == e)
                 return i;
             else if(store[i] > e)
@@ -197,13 +220,16 @@ int PackedMemoryArray<E>::find(E e) const {
 }
 
 template <class E>
-void PackedMemoryArray<E>::insert_element_after(E e, E after) {
+void PackedMemoryArray<E>::insert_element_after(E e, E after, int pos) {
     // Find where we can insert
-    int loc = find(after);
+    int loc;
+    loc = pos;
+#ifndef OPTIMIZE
     assert(loc != -1);
+#endif
     int insert_at = ++loc;
     // Do we have space at the location we want to insert?
-    if(insert_at < store.size() && !elem_exists_at(insert_at)) {
+    if(insert_at < store.size() && !ELEM_EXISTS_AT(insert_at)) {
         // Great! Now insert it there.
         insert_element_at(e, insert_at);
         return;
@@ -221,6 +247,36 @@ void PackedMemoryArray<E>::insert_element_after(E e, E after) {
 }
 
 template <class E>
+int PackedMemoryArray<E>::upper_bound_in_segment(E e, int v) {
+    int best = -1;
+    for(int i = v*segment_size; i < (v+1)*segment_size; i++)
+        if(ELEM_EXISTS_AT(i) && store[i] <= e) 
+            return best = i;
+    return best;
+}
+
+template <class E>
+int PackedMemoryArray<E>::upper_bound(E e) {
+    int l = 0, r = ((int)store.size())/segment_size, pos; 
+    while(l != r) {
+        int m = l + (r - l + 1)/2;
+        pos = upper_bound_in_segment(e, m);
+        if (pos == -1) 
+            r = m-1;
+        else
+            l = m; 
+    }
+    pos = upper_bound_in_segment(e, l);
+    return pos;
+}
+
+template <class E>
+inline void PackedMemoryArray<E>::insert_element(E e) {
+    int pos = upper_bound(e);
+    insert_element_after(e, store[pos], pos);
+}
+
+template <class E>
 int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_index, int * node_level) const {
     // If we are trying to insert at the end of the PMA
     if (index == store.size()) {
@@ -229,19 +285,19 @@ int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_ind
 
     int level = -1;
     int start = index;
-    int end = index, sz = smallest_window_size, count = 1;
+    int end = index, sz = segment_size, count = 1;
     bool found = false;
     do {
         // Get the boundaries of the next interval
         int left = start - (start % sz);
-        int right = start + (sz - (start % sz)-1);
+        int right = left + sz;
 
         // Count only the necessary parts
         for(int i = left; i < start; i++)
-            if(elem_exists_at(i))
+            if(ELEM_EXISTS_AT(i))
                 count++;
         for(int i = end + 1; i <= right; i++)
-            if(elem_exists_at(i))
+            if(ELEM_EXISTS_AT(i))
                 count++;
         
         start = left;
@@ -249,6 +305,7 @@ int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_ind
 
         ++level;
         bool is_balanced = !is_out_of_balance(count + 1, level);
+        // std::cout << "Level: " << level << ", from " << left << " to " << right << ", having " << count+1 << ", elements, is balanced?: " << is_balanced << ", segment_size: " << smallest_window_size << std::endl;
         // Would be able to fit another element?
         if(is_balanced) {
             found = true;
@@ -273,64 +330,67 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
     // Create a new store
     std::vector<E> new_store;
     new_store.resize(store.size() * 2);
-    std::vector<bool> new_exists_bitmask;
-    new_exists_bitmask.resize((int)ceil(s+1));
+    std::vector<bool> new_exists;
+    new_exists.resize((int)ceil(s+1));
     
     int count = 0, i;
     // Insert all elements less than e
     for(i = 0; i < store.size(); i++) 
-        if(elem_exists_at(i)) {
+        if(ELEM_EXISTS_AT(i)) {
             if(store[i] > e)
                 break;
-            new_exists_bitmask[count] = 1;
+            new_exists[count] = 1;
             new_store[count++] = store[i];
         }
     
     // Insert the element we wanted
-    new_exists_bitmask[count] = 1;
+    new_exists[count] = 1;
     new_store[count++] = e;
     
     // Insert rest of the elements
     for(; i < store.size(); i++) 
-        if(elem_exists_at(i)) {
-            new_exists_bitmask[count] = 1;
+        if(ELEM_EXISTS_AT(i)) {
+            new_exists[count] = 1;
             new_store[count++] = store[i];
         }
 
     // Replace the existing store and bitmask
     store = new_store;
-    exists_bitmask = new_exists_bitmask;
+    exists = new_exists;
  
     // Increment the number of elements in the PMA
     s++;
     
-    // Recalculate l and smallest_window_size
+    // std::cout << "Old smallest window size: " << segment_size << std::endl;
+    // Recalculate l and segment_size
     int log2n = __builtin_popcount(store.size()-1);
     if(log2n & (log2n-1)) {
         // log2n is not a power of 2, round it up to the nearest power of 2.
-        smallest_window_size = (int)floor(log2(1<<(log2n+1)));
+        segment_size = 1<<((int)floor(log2(log2n<<1)));
     }
     else {
         // log2n is a power of 2, so, all is fine.
-        smallest_window_size = log2n;
+        segment_size = 1<<log2n;
     }
-    l = log2n - log2(smallest_window_size);
-    
+    l = log2n - log2(segment_size);
+    // std::cout << "New smallest window size: " << segment_size << std::endl;
+
     // Now rebalance the entire PMA 
     rebalance(0, l);
 }
 
 template<class E>
 void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
+#ifndef OPTIMZE
     assert(level <= l);
-    int c = capacity_at(level);
-    print();
+#endif
+    int c = CAPACITY_AT(level);
     // Move all the elements to one side
     int last = index + c - 1, count = 0;
     bool element_inserted = false;
     std::vector<E> level_copy;
     for(int i = last; i >= index; i--) {
-        if(elem_exists_at(i)) {
+        if(ELEM_EXISTS_AT(i)) {
             if(!element_inserted && store[i] < e) {
                 level_copy.push_back(e);
                 element_inserted = true;
@@ -341,7 +401,10 @@ void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
             count++;
         }
     }
-    
+
+    if(!element_inserted)
+        level_copy.push_back(e);
+
     // Now copy
     double k = (c*1.0)/(level_copy.size()), p = 0;
     int actual_index = 0, correct_index;
@@ -356,18 +419,24 @@ void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
 
 template<class E>
 void PackedMemoryArray<E>::rebalance(int index, int level) {
+#ifndef OPTIMIZE 
     assert(level <= l);
-    int c = capacity_at(level);
+#endif
+    int c = CAPACITY_AT(level);
     // Move all the elements to one side
     int last = index + c - 1, count = 0;
     for(int i = last; i >= index; i--) {
-        if(elem_exists_at(i)) {
+        if(ELEM_EXISTS_AT(i)) {
             if(i != last) {
                 // Copy the element to the leftmost position
                 insert_element_at(store[i], last);
                 // Delete the original copy of the element
-                delete_element_at(i);
-                // Update the leftmost pointer, and count of elements moved
+                #ifndef OPTIMIZE
+                    delete_element_at(i);
+                #else
+                    exists[i] = 0;
+                #endif
+               // Update the leftmost pointer, and count of elements moved
             }
             --last;
             count++;
@@ -387,33 +456,98 @@ void PackedMemoryArray<E>::rebalance(int index, int level) {
         if(actual_index != correct_index)
             insert_element_at(store[actual_index], correct_index);
         // Remove the left most copy
+#ifndef OPTIMIZE
         delete_element_at(actual_index);
+#else
+        exists[actual_index] = 0;
+#endif
     } 
 }
 
 template <class E>
 void PackedMemoryArray<E>::delete_element_at(int index) {
-    assert(elem_exists_at(index));
+#ifndef OPTIMIZE
+    assert(ELEM_EXISTS_AT(index));
+#endif
     // Just mark it non existent
-    exists_bitmask[index] = 0;
+    exists[index] = 0;
 }
 
 int main() {
-    int e = 3;
-    PackedMemoryArray<int> pma(e);
+    
+    PackedMemoryArray<int> pma(2);
+
+    for(int i = 3; i < 10000000; i++) {
+        pma.insert_element(i);
+    }
+    //pma.print();
+    
+    /*
+    float e = 3;
+    PackedMemoryArray<float> pma(e);
+    
     pma.print();
     pma.insert_element_after(4, 3);
     pma.print();
-    
-    //print_intervals(63, 128);
     pma.insert_element_after(5, 4);
     pma.print();
-    pma.insert_element_after(6, 5);
+    pma.insert_element_after(4, 3);
     pma.print();
-    pma.insert_element_after(7, 6);
+    pma.insert_element_after(4, 3);
     pma.print();
-    pma.insert_element_after(9, 7);
+    pma.insert_element_after(4, 3);
     pma.print();
-    pma.insert_element_after(8, 7);
-    pma.print(); 
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(4, 3);
+    pma.print();
+    pma.insert_element_after(3.5, 3);
+    pma.print();
+    pma.insert_element_after(3.6, 3.5);
+    pma.print();
+    pma.insert_element_after(3.7, 3.6);
+    pma.print();
+    pma.insert_element_after(3.8, 3.7);
+    pma.print();
+    pma.insert_element_after(5.2, 5);
+    pma.print();
+    pma.insert_element_after(5.3, 5.2);
+    pma.print();
+    pma.insert_element_after(3.65, 3.6);
+    pma.print();
+    */
+    /*
+    float e = 3;
+    PackedMemoryArray<float> pma(e);
+    
+    pma.insert_element(4);
+    pma.insert_element(5);
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(4); 
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(4);
+    pma.insert_element(3.5);
+    pma.insert_element(3.6);
+    pma.insert_element(3.7);
+    pma.insert_element(3.8);
+    pma.insert_element(5.2);
+    pma.insert_element(5.3);
+    pma.insert_element(3.65); 
+    pma.print();
+
+    */
 }
+
