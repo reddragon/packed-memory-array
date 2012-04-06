@@ -2,11 +2,13 @@
 
 ### Implementation-1
 
-Time to insert 10<sup>7</sup> elements: 3min 8sec
+Time to insert 10<sup>7</sup> elements: 3min 8sec<sup>*</sup>
 
 ### Implementation-2
 
-Time to insert 10<sup>7</sup> elements: 2min 40sec
+Time to insert 10<sup>7</sup> elements: 2min 40sec<sup>*</sup>
+
+<small>* (When compiled with -O2 using g++, on a 1.73 GHz Pentium M machine)</small>
 
 ### Analysis
 
