@@ -21,8 +21,7 @@ int log2(int n) {
     return lg2;
 }
 
-int nmoves = 0;
-
+unsigned int nmoves = 0;
 
 struct PMA {
     vi_t impl;
@@ -56,8 +55,8 @@ struct PMA {
 
         PMAIterator&
         operator++() {
-            if (i < pma->impl.size()) ++i;
-            while (i < pma->impl.size() && !pma->present[i]) {
+            if (i < (int)pma->impl.size()) ++i;
+            while (i < (int)pma->impl.size() && !pma->present[i]) {
                 ++i;
             }
             return *this;
@@ -126,7 +125,7 @@ struct PMA {
     int
     left_interval_boundary(int i, int interval_size) {
         assert(interval_size == (1 << log2(interval_size)));
-        assert(i < this->impl.size());
+        assert(i < (int)this->impl.size());
 
         int q = i / interval_size;
         int boundary = q * interval_size;
@@ -172,12 +171,10 @@ struct PMA {
     }
 
     int
-    lb_in_chunk(int l, int v, int &sz) {
+    lb_in_chunk(int l, int v) {
         int i;
-        sz = 0;
         for (i = l; i < l + chunk_size; ++i) {
             if (this->present[i]) {
-                ++sz;
                 if (this->impl[i] >= v) {
                     return i;
                 }
@@ -205,8 +202,20 @@ struct PMA {
                 m = l + (r-l)/2;
                 int sz;
                 int left = left_interval_boundary(m * chunk_size, chunk_size);
-                int pos = lb_in_chunk(left, v, sz);
-                if (pos == left + chunk_size && sz > 0) {
+                int pos = lb_in_chunk(left, v);
+
+                // Why does this work? We assume that every chunk of
+                // size this->chunk_size contains at least 1
+                // element. Hence, if we reach the end of an interval
+                // without finding a lower bound, we conclude that all
+                // the elements in this chunk are < 'v'. Because every
+                // chunk contains at least 1 element, we will never
+                // reach the end of an interval because the interval
+                // is empty.
+                //
+                // Note: This is why we need lower density thresholds!
+                // 
+                if (pos == left + chunk_size) {
                     // Move to right half
                     l = m + 1;
                 } else {
@@ -273,10 +282,12 @@ struct PMA {
 
     void
     insert(int v) {
+        /*
         if ((this->nelems + 2) * 2 > this->impl.size()) {
             // resize array
             this->resize(2 * this->impl.size());
         }
+        */
 
         int i = lower_bound(v);
         if (i == this->impl.size()) {
@@ -307,7 +318,14 @@ struct PMA {
             while (!in_limit) {
                 w *= 2;
                 level += 1;
-                assert(level <= this->nlevels);
+                // assert(level <= this->nlevels);
+                if (level > this->nlevels) {
+                    // Root node is out of balance. Resize array.
+                    this->resize(2 * this->impl.size());
+                    this->insert(v);
+                    return;
+                }
+
                 l = this->left_interval_boundary(i, w);
                 get_interval_stats(l, level, in_limit, sz);
                 dprintf("level: %d, this->nlevels: %d, in_limit: %d, sz: %d\n", level, this->nlevels, in_limit, sz);
@@ -414,7 +432,7 @@ main() {
 
     vi_t v;
     for (int i = 0; i < 10000000; ++i) {
-        p1.insert(150000 - i);
+        p1.insert(10000000 - i);
         // v.insert(v.begin(), 100000 - i);
     }
     printf("%d moves to insert %d elements\n", nmoves, p1.size());
