@@ -301,10 +301,18 @@ struct PMA {
         int level = 0;
         int l = this->left_interval_boundary(i, w);
 
-        // Number of elements in current window
-        int sz = 0;
+        // Number of elements in current window. We just need sz to be
+        // less than w -- we don't need the exact value of 'sz' here.
+        int sz = w - 1;
+
         bool in_limit = false;
-        get_interval_stats(l, level, in_limit, sz);
+
+        // If the current chunk has space, then the last element will
+        // be unused (with significant probability). First check that
+        // as a quick check.
+        if (this->present[l + this->chunk_size - 1]) {
+            get_interval_stats(l, level, in_limit, sz);
+        }
 
         if (sz < w) {
             // There is some space in this interval. We can just
