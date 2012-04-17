@@ -1,19 +1,20 @@
 #include "dvector.hpp"
-#include <ctime>
+#include "../include/timer.hpp"
 
 int
 main() {
     deamortized_vector<int> dvi;
     vector<int> vi;
-    for (int i = 0; i < 40000; ++i) {
-		clock_t start = clock();
+    Timer t;
+    for (int i = 0; i < 4096; ++i) {
+		t.start();
 		for (int j = 0; j < 128; ++j) {
-			dvi.push_back(j);
-			//vi.push_back(j);
+			//dvi.push_back(j);
+			vi.push_back(j);
 		}
-		clock_t end = clock();
-		if (end - start + 1 > 1)
-			printf("%d\t%ld\n", i, end - start + 1);
+		//if (end - start + 1 > 1)
+		double d = t.stop();
+		printf("%d\t%lf\n", i, d);
     }
     /*
     for (int i = 0; i < 100; ++i) {
