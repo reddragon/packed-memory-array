@@ -1,4 +1,4 @@
-set xlabel "Insert number"
+set xlabel "Insert number (in logscale)"
 set ylabel "Time taken (in logscale)"
 set terminal png
 set output 'deamortised.png'
