@@ -1,4 +1,4 @@
-set xlabel "Number of Inserts (in multiples of 128)"
+set xlabel "Insert number"
 set ylabel "Time taken (in logscale)"
 set terminal png
 set output 'deamortised.png'
