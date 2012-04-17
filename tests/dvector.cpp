@@ -12,8 +12,8 @@ main() {
 			//vi.push_back(j);
 		}
 		clock_t end = clock();
-		if (end - start + 1 > 1)
-			printf("%d\t%ld\n", i, end - start + 1);
+		// if (end - start + 1 > 1) // always true!!
+                printf("%d\t%ld\n", i, end - start + 1);
     }
     /*
     for (int i = 0; i < 100; ++i) {
