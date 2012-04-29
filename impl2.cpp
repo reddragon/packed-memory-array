@@ -21,7 +21,7 @@ int log2(int n) {
     return lg2;
 }
 
-unsigned int nmoves = 0;
+long long nmoves = 0;
 
 struct PMA {
     vi_t impl;
@@ -165,7 +165,7 @@ struct PMA {
         for (int i = left; i < left + w; ++i) {
             sz += this->present[i] ? 1 : 0;
         }
-        double q = (double)sz / double(w);
+        double q = (double)(sz+1) / double(w);
         dprintf("q: %f, t: %f\n", q, t);
         in_limit = q < t;
     }
@@ -383,16 +383,8 @@ is_sorted(Iter f, Iter l) {
     return true;
 }
 
-int
-main() {
-    dprintf("log2(%d) = %d\n", 6, log2(6));
-    PMA p1;
-    // PMA p2(4);
-    // PMA p3(8);
-    // PMA p10(1024);
-
-    // p10.left_interval_boundary(54, 8);
-
+void
+test_inserts(PMA &p1) {
     p1.insert(80);
     p1.print();
 
@@ -437,13 +429,29 @@ main() {
 
     p1.insert(23);
     p1.print();
+}
 
+int
+main() {
+    dprintf("log2(%d) = %d\n", 6, log2(6));
+    PMA p1;
+    // PMA p2(4);
+    // PMA p3(8);
+    // PMA p10(1024);
+
+    // p10.left_interval_boundary(54, 8);
+
+    // test_inserts(p1);
+
+    srand(0);
     vi_t v;
-    for (int i = 0; i < 10000000; ++i) {
-        p1.insert(10000000 - i);
+#define NINSERTS 10000000
+    for (int i = 0; i < NINSERTS; ++i) {
+        // p1.insert(rand() % 65536);
+        p1.insert(NINSERTS - i);
         // v.insert(v.begin(), 100000 - i);
     }
-    printf("%d moves to insert %d elements\n", nmoves, p1.size());
+    printf("%llu moves to insert %d elements\n", nmoves, p1.size());
 
     // assert(is_sorted(p1.begin(), p1.end()));
 
