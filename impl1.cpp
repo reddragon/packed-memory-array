@@ -2,6 +2,8 @@
 #include <vector>
 #include <cassert>
 #include <cmath>
+#include "include/timer.hpp"
+#include <iostream>
 
 // WARNING: Do not change this.
 #define VAL_C 2
@@ -139,7 +141,7 @@ uint32 PackedMemoryArray<E>::capacity_at(int level) const {
 }
 
 template <class E>
-PackedMemoryArray<E>::PackedMemoryArray(E e) : c(VAL_C), t_0(VAL_T_0), t_l(VAL_T_L) {
+PackedMemoryArray<E>::PackedMemoryArray(E e) : t_0(VAL_T_0), t_l(VAL_T_L), c(VAL_C) {
     // Assert that c is a power of 2 and > 1
 #ifndef OPTIMIZE
     assert(c > 1 && !(c & (c-1)));
@@ -229,7 +231,7 @@ void PackedMemoryArray<E>::insert_element_after(E e, E after, int pos) {
 #endif
     int insert_at = ++loc;
     // Do we have space at the location we want to insert?
-    if(insert_at < store.size() && !ELEM_EXISTS_AT(insert_at)) {
+    if(insert_at < (int)store.size() && !ELEM_EXISTS_AT(insert_at)) {
         // Great! Now insert it there.
         insert_element_at(e, insert_at);
         return;
@@ -279,13 +281,14 @@ inline void PackedMemoryArray<E>::insert_element(E e) {
 template <class E>
 int PackedMemoryArray<E>::smallest_interval_in_balance(int index, int * node_index, int * node_level) const {
     // If we are trying to insert at the end of the PMA
-    if (index == store.size()) {
-        index = store.size() - 1;
+    if (index == (int)store.size()) {
+        index = (int)store.size() - 1;
     }
 
     int level = -1;
     int start = index;
-    int end = index, sz = segment_size, count = 1;
+    int end = index, count = 1;
+    unsigned int sz = segment_size;
     bool found = false;
     do {
         // Get the boundaries of the next interval
@@ -335,7 +338,7 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
     
     int count = 0, i;
     // Insert all elements less than e
-    for(i = 0; i < store.size(); i++) 
+    for(i = 0; i < (int)store.size(); i++) 
         if(ELEM_EXISTS_AT(i)) {
             if(store[i] > e)
                 break;
@@ -348,7 +351,7 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
     new_store[count++] = e;
     
     // Insert rest of the elements
-    for(; i < store.size(); i++) 
+    for(; i < (int)store.size(); i++) 
         if(ELEM_EXISTS_AT(i)) {
             new_exists[count] = 1;
             new_store[count++] = store[i];
@@ -407,7 +410,7 @@ void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
 
     // Now copy
     double k = (c*1.0)/(level_copy.size()), p = 0;
-    int actual_index = 0, correct_index;
+    int correct_index;
     for(int i = level_copy.size()-1; i >= 0; i--) {
         p += k;
         // Now insert the element at the right position
@@ -476,78 +479,15 @@ void PackedMemoryArray<E>::delete_element_at(int index) {
 int main() {
     
     PackedMemoryArray<int> pma(2);
-
+    
+    Timer t;
+    t.start();
     for(int i = 3; i < 10000000; i++) {
         pma.insert_element(i);
     }
+    double time_taken = t.stop();
+    std::cout << "Head Inserts: " << time_taken/10000000.0 << std::endl;
     //pma.print();
-    
-    /*
-    float e = 3;
-    PackedMemoryArray<float> pma(e);
-    
-    pma.print();
-    pma.insert_element_after(4, 3);
-    pma.print();
-    pma.insert_element_after(5, 4);
-    pma.print();
-    pma.insert_element_after(4, 3);
-    pma.print();
-    pma.insert_element_after(4, 3);
-    pma.print();
-    pma.insert_element_after(4, 3);
-    pma.print();
-    pma.insert_element_after(4, 3);
-    pma.print();
-    pma.insert_element_after(4, 3);
-    pma.print();
-    pma.insert_element_after(4, 3);
-    pma.print();
-    pma.insert_element_after(4, 3);
-    pma.print();
-    pma.insert_element_after(4, 3);
-    pma.print();
-    pma.insert_element_after(4, 3);
-    pma.print();
-    pma.insert_element_after(3.5, 3);
-    pma.print();
-    pma.insert_element_after(3.6, 3.5);
-    pma.print();
-    pma.insert_element_after(3.7, 3.6);
-    pma.print();
-    pma.insert_element_after(3.8, 3.7);
-    pma.print();
-    pma.insert_element_after(5.2, 5);
-    pma.print();
-    pma.insert_element_after(5.3, 5.2);
-    pma.print();
-    pma.insert_element_after(3.65, 3.6);
-    pma.print();
-    */
-    /*
-    float e = 3;
-    PackedMemoryArray<float> pma(e);
-    
-    pma.insert_element(4);
-    pma.insert_element(5);
-    pma.insert_element(4);
-    pma.insert_element(4);
-    pma.insert_element(4);
-    pma.insert_element(4); 
-    pma.insert_element(4);
-    pma.insert_element(4);
-    pma.insert_element(4);
-    pma.insert_element(4);
-    pma.insert_element(4);
-    pma.insert_element(3.5);
-    pma.insert_element(3.6);
-    pma.insert_element(3.7);
-    pma.insert_element(3.8);
-    pma.insert_element(5.2);
-    pma.insert_element(5.3);
-    pma.insert_element(3.65); 
-    pma.print();
 
-    */
 }
 
