@@ -3,7 +3,7 @@
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <// assert.h>
 #include "../include/timer.hpp"
 
 using namespace std;
@@ -82,13 +82,13 @@ struct PMA {
 
         int&
         operator*() {
-            assert(pma->present[this->i]);
+            // assert(pma->present[this->i]);
             return pma->impl[this->i];
         }
 
         int*
         operator->() {
-            assert(pma->present[this->i]);
+            // assert(pma->present[this->i]);
             return &(pma->impl[this->i]);
         }
     };
@@ -97,8 +97,8 @@ struct PMA {
 
     PMA(int capacity = 2)
         : nelems(0) {
-        assert(capacity > 1);
-        assert(1 << log2(capacity) == capacity);
+        // assert(capacity > 1);
+        // assert(1 << log2(capacity) == capacity);
 
         this->init_vars(capacity);
         this->impl.resize(capacity);
@@ -108,7 +108,7 @@ struct PMA {
 
     double
     upper_threshold_at(int level) const {
-        assert(level <= this->nlevels);
+        // assert(level <= this->nlevels);
         double threshold = 1.0 - ((1.0 - 0.5) * level) / (double)this->lgn;
         return threshold;
     }
@@ -116,7 +116,7 @@ struct PMA {
     void
     init_vars(int capacity) {
         this->chunk_size = 1 << log2(log2(capacity) * 2);
-        assert(this->chunk_size == (1 << log2(this->chunk_size)));
+        // assert(this->chunk_size == (1 << log2(this->chunk_size)));
         this->nchunks = capacity / this->chunk_size;
         this->nlevels = log2(this->nchunks);
         this->lgn = log2(capacity);
@@ -125,8 +125,8 @@ struct PMA {
 
     int
     left_interval_boundary(int i, int interval_size) {
-        assert(interval_size == (1 << log2(interval_size)));
-        assert(i < (int)this->impl.size());
+        // assert(interval_size == (1 << log2(interval_size)));
+        // assert(i < (int)this->impl.size());
 
         int q = i / interval_size;
         int boundary = q * interval_size;
@@ -136,8 +136,8 @@ struct PMA {
 
     void
     resize(int capacity) {
-        assert(capacity > this->impl.size());
-        assert(1 << log2(capacity) == capacity);
+        // assert(capacity > this->impl.size());
+        // assert(1 << log2(capacity) == capacity);
 
         vi_t tmpi(capacity);
         vector<bool> tmpp(capacity);
@@ -268,13 +268,13 @@ struct PMA {
         }
         double m = (double)(1<<level)*chunk_size / (double)tmp.size();
         dprintf("m: %f, tmp.size(): %d\n", m, tmp.size());
-        assert(m >= 1.0);
+        // assert(m >= 1.0);
         for (int i = 0; i < tmp.size(); ++i) {
             int k = i * m + left;
             if (k >= left + w) {
                 dprintf("k: %d, left+w: %d\n", k, left + w);
             }
-            assert(k < left + w);
+            // assert(k < left + w);
             this->present[k] = true;
             this->impl[k] = tmp[i];
         }
@@ -294,8 +294,8 @@ struct PMA {
         if (i == this->impl.size()) {
             --i;
         }
-        assert(i > -1);
-        assert(i < this->impl.size());
+        // assert(i > -1);
+        // assert(i < this->impl.size());
 
         // Check in a window of size 'w'
         int w = chunk_size;
@@ -327,7 +327,7 @@ struct PMA {
             while (!in_limit) {
                 w *= 2;
                 level += 1;
-                // assert(level <= this->nlevels);
+                // // assert(level <= this->nlevels);
                 if (level > this->nlevels) {
                     // Root node is out of balance. Resize array.
                     this->resize(2 * this->impl.size());
@@ -369,7 +369,7 @@ struct PMA {
     }
 
 };
-
+n
 template <typename Iter>
 bool
 is_sorted(Iter f, Iter l) {

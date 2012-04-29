@@ -345,20 +345,17 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
                 break;
             new_exists[count] = 1;
             new_store[count++] = store[i];
-            total_moves++;
         }
     
     // Insert the element we wanted
     new_exists[count] = 1;
     new_store[count++] = e;
-    total_moves++;
     
     // Insert rest of the elements
     for(; i < (int)store.size(); i++) 
         if(ELEM_EXISTS_AT(i)) {
             new_exists[count] = 1;
             new_store[count++] = store[i];
-            total_moves++;
         }
 
     // Replace the existing store and bitmask
@@ -368,7 +365,6 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
     // Increment the number of elements in the PMA
     s++;
     
-    // std::cout << "Old smallest window size: " << segment_size << std::endl;
     // Recalculate l and segment_size
     int log2n = __builtin_popcount(store.size()-1);
     if(log2n & (log2n-1)) {
@@ -380,8 +376,8 @@ void PackedMemoryArray<E>::expand_PMA(E e) {
         segment_size = 1<<log2n;
     }
     l = log2n - log2(segment_size);
-    // std::cout << "New smallest window size: " << segment_size << std::endl;
-
+    
+    total_moves += (int)store.size();
     // Now rebalance the entire PMA 
     rebalance(0, l);
 }
@@ -401,11 +397,9 @@ void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
             if(!element_inserted && store[i] < e) {
                 level_copy.push_back(e);
                 element_inserted = true;
-                total_moves++;
             }
             level_copy.push_back(store[i]);
             delete_element_at(i);
-            total_moves++;
             --last;
             count++;
         }
@@ -413,7 +407,6 @@ void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
 
     if(!element_inserted) {
         level_copy.push_back(e);
-        total_moves++;
     }
 
     // Now copy
@@ -424,7 +417,9 @@ void PackedMemoryArray<E>::rebalance(int index, int level, E e) {
         // Now insert the element at the right position
         correct_index = index + (int)p - 1;
         insert_element_at(level_copy[i], correct_index);
-    } 
+    }
+
+    total_moves += (2*c);
 }
 
 
@@ -473,6 +468,7 @@ void PackedMemoryArray<E>::rebalance(int index, int level) {
         exists[actual_index] = 0;
 #endif
     } 
+    total_moves += (2*c);
 }
 
 template <class E>
@@ -485,16 +481,15 @@ void PackedMemoryArray<E>::delete_element_at(int index) {
 }
 
 int main() {
-    
     PackedMemoryArray<int> pma(2);
     
     Timer t;
     t.start();
-    for(int i = 3; i < 100; i++) {
+    for(int i = 3; i < 1000; i++) {
         pma.insert_element(i);
     }
     double time_taken = t.stop();
     std::cout << "Head Inserts: " << time_taken/1000000.0 << " seconds " << std::endl;
-    std::cout << "Elements Moved: " << pma.total_moves << std::endl;
+    // std::cout << "Elements Moved: " << pma.total_moves << std::endl;
 }
 
