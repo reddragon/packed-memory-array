@@ -3,7 +3,7 @@
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
-#include <// assert.h>
+#include <assert.h>
 #include "../include/timer.hpp"
 
 using namespace std;
