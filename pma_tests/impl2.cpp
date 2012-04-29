@@ -166,7 +166,7 @@ struct PMA {
         for (int i = left; i < left + w; ++i) {
             sz += this->present[i] ? 1 : 0;
         }
-        double q = (double)sz / double(w);
+        double q = (double)(sz+1) / double(w);
         dprintf("q: %f, t: %f\n", q, t);
         in_limit = q < t;
     }
