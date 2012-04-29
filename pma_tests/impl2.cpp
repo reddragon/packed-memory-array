@@ -6,6 +6,7 @@
 #include <assert.h>
 #include "../include/timer.hpp"
 #include <cstring>
+#include <cmath>
 
 using namespace std;
 
@@ -401,7 +402,7 @@ main(int argc, char **argv) {
 	printf("Time taken for %d elements to be inserted at head: %lf\n", elems, ms/1000000.0);
     	printf("%llu moves to insert %d elements at head\n", nmoves, p1.size());
     }
-    else if(!strcmp(argv[1], "random")) {
+    else if (!strcmp(argv[1], "random")) {
     	srand(0);
     	t.start();
 	for (int i = 0; i < elems; ++i) {
@@ -410,5 +411,18 @@ main(int argc, char **argv) {
     	double ms = t.stop();
 	printf("Time taken for %d elements to be inserted randomly: %lf\n", elems, ms/1000000.0);
     	printf("%llu moves to insert %d random elements\n", nmoves, p1.size());
+   }
+   else if (!strcmp(argv[1], "graph")) {
+        #define BATCHSZ 1024
+        int start = 20000000;
+        int batches = (int)(ceil(elems * 1.0 / BATCHSZ));
+        for (int i = 0; i < batches; ++i) {
+            t.start();
+            for (int j = 0; j < BATCHSZ; ++j, --start) {
+                p1.insert(start);
+            }
+            double ms = t.stop();
+            printf("%d %lf\n", i, ms/1000000.0);
+        }
    }
 }
