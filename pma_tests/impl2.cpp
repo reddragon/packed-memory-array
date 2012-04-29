@@ -396,7 +396,7 @@ main(int argc, char **argv) {
     if (!strcmp(argv[1], "hammer")) {
    	t.start();
 	for (int i = 0; i < elems; ++i) {
-        	p1.insert(10001000 - i);
+        	p1.insert(20001000 - i);
     	}
     	double ms = t.stop();
 	printf("Time taken for %d elements to be inserted at head: %lf\n", elems, ms/1000000.0);

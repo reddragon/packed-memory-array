@@ -491,7 +491,7 @@ int main(int argc, char ** argv) {
     	Timer t;
     	t.start();
     	for(int i = 3; i < elems; i++) {
-        	pma.insert_element(i);
+        	pma.insert_element(20000000-i);
     	}
     	double time_taken = t.stop();
     	std::cout << "Head Inserts of " << elems << " elements: " << time_taken/1000000.0 << " seconds " << std::endl;
