@@ -2,6 +2,7 @@
 #include <vector>
 #include <cassert>
 #include <cmath>
+#include <cstdlib>
 #include "include/timer.hpp"
 #include <iostream>
 
