@@ -485,7 +485,7 @@ int main() {
     
     Timer t;
     t.start();
-    for(int i = 3; i < 1000; i++) {
+    for(int i = 3; i < 10000000; i++) {
         pma.insert_element(i);
     }
     double time_taken = t.stop();

@@ -22,7 +22,7 @@ int log2(int n) {
     return lg2;
 }
 
-unsigned int nmoves = 0;
+long long nmoves = 0;
 
 struct PMA {
     vi_t impl;
@@ -387,10 +387,10 @@ is_sorted(Iter f, Iter l) {
 int
 main() {
     PMA p1;
-    for (int i = 0; i < 100; ++i) {
-        p1.insert(10000000 - i);
+    for (int i = 0; i < 10000000; ++i) {
+        p1.insert(10001000 - i);
         // v.insert(v.begin(), 100000 - i);
     }
     //printf("Time taken: %lf\n", ms/1000000.0);
-    printf("%d moves to insert %d elements\n", nmoves, p1.size());
+    printf("%llu moves to insert %d elements\n", nmoves, p1.size());
 }
