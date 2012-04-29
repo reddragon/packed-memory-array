@@ -369,7 +369,7 @@ struct PMA {
     }
 
 };
-n
+
 template <typename Iter>
 bool
 is_sorted(Iter f, Iter l) {
