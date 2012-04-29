@@ -2,6 +2,7 @@
 #include <vector>
 #include <cassert>
 #include <cmath>
+#include <cstdlib>
 
 // WARNING: Do not change this.
 #define VAL_C 2
@@ -476,9 +477,15 @@ void PackedMemoryArray<E>::delete_element_at(int index) {
 int main() {
     
     PackedMemoryArray<int> pma(2);
-
-    for(int i = 3; i < 10000000; i++) {
-        pma.insert_element(i);
+    srand(0);
+    
+    #define BATCHSZ 2000
+    for(int i = 3; i < 10000000/BATCHSZ; ++i) {
+        int start = rand()%(1<<16);
+        for (int j = 1; j <= BATCHSZ; ++j) 
+            pma.insert_element(start + j);
+        
+        //pma.insert_element(rand()%(1<<16));
     }
     //pma.print();
     
