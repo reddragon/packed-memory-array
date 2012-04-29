@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "../include/timer.hpp"
+#include <cstring>
 
 using namespace std;
 
@@ -385,12 +386,29 @@ is_sorted(Iter f, Iter l) {
 }
 
 int
-main() {
+main(int argc, char **argv) {
+    
     PMA p1;
-    for (int i = 0; i < 10000000; ++i) {
-        p1.insert(10001000 - i);
-        // v.insert(v.begin(), 100000 - i);
+    int elems = atoi(argv[2]); 
+    
+    Timer t;
+    if (!strcmp(argv[1], "hammer")) {
+   	t.start();
+	for (int i = 0; i < elems; ++i) {
+        	p1.insert(10001000 - i);
+    	}
+    	double ms = t.stop();
+	printf("Time taken for %d elements to be inserted at head: %lf\n", elems, ms/1000000.0);
+    	printf("%llu moves to insert %d elements at head\n", nmoves, p1.size());
     }
-    //printf("Time taken: %lf\n", ms/1000000.0);
-    printf("%llu moves to insert %d elements\n", nmoves, p1.size());
+    else if(!strcmp(argv[1], "random")) {
+    	srand(0);
+    	t.start();
+	for (int i = 0; i < elems; ++i) {
+        	p1.insert(rand()%(1<<22));
+    	}
+    	double ms = t.stop();
+	printf("Time taken for %d elements to be inserted randomly: %lf\n", elems, ms/1000000.0);
+    	printf("%llu moves to insert %d random elements\n", nmoves, p1.size());
+   }
 }

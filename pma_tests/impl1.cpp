@@ -5,6 +5,8 @@
 #include "../include/timer.hpp"
 #include <iostream>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 // WARNING: Do not change this.
 #define VAL_C 2
@@ -480,16 +482,29 @@ void PackedMemoryArray<E>::delete_element_at(int index) {
     exists[index] = 0;
 }
 
-int main() {
+int main(int argc, char ** argv) {
     PackedMemoryArray<int> pma(2);
+    srand(0);
     
-    Timer t;
-    t.start();
-    for(int i = 3; i < 10000000; i++) {
-        pma.insert_element(i);
+    int elems = atoi(argv[2]);
+    if (!strcmp(argv[1], "hammer")) {
+    	Timer t;
+    	t.start();
+    	for(int i = 3; i < elems; i++) {
+        	pma.insert_element(i);
+    	}
+    	double time_taken = t.stop();
+    	std::cout << "Head Inserts of " << elems << " elements: " << time_taken/1000000.0 << " seconds " << std::endl;
     }
-    double time_taken = t.stop();
-    std::cout << "Head Inserts: " << time_taken/1000000.0 << " seconds " << std::endl;
-    // std::cout << "Elements Moved: " << pma.total_moves << std::endl;
+    else if (!strcmp(argv[1], "random")) {
+    	Timer t;
+    	t.start();
+    	for(int i = 3; i < elems; i++) {
+        	pma.insert_element(rand()%(1<<30));
+    	}
+    	double time_taken = t.stop();
+    	std::cout << "Random Inserts of " << elems << " elements: " << time_taken/1000000.0 << " seconds " << std::endl;
+    }
+// std::cout << "Elements Moved: " << pma.total_moves << std::endl;
 }
 
