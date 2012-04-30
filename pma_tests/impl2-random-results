@@ -1,0 +1,14 @@
+Time taken for 10 elements to be inserted randomly: 0.000025
+80 moves to insert 10 random elements
+Time taken for 100 elements to be inserted randomly: 0.000063
+1432 moves to insert 100 random elements
+Time taken for 1000 elements to be inserted randomly: 0.000601
+20056 moves to insert 1000 random elements
+Time taken for 10000 elements to be inserted randomly: 0.007683
+202104 moves to insert 10000 random elements
+Time taken for 100000 elements to be inserted randomly: 0.143492
+3154168 moves to insert 100000 random elements
+Time taken for 1000000 elements to be inserted randomly: 2.327788
+36697336 moves to insert 1000000 random elements
+Time taken for 10000000 elements to be inserted randomly: 40.548462
+360932664 moves to insert 10000000 random elements

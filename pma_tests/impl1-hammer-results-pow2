@@ -1,0 +1,16 @@
+Head Inserts of 1024 elements: 0.001556 seconds 
+Head Inserts of 2048 elements: 0.003525 seconds 
+Head Inserts of 4096 elements: 0.008013 seconds 
+Head Inserts of 8192 elements: 0.018195 seconds 
+Head Inserts of 16384 elements: 0.040514 seconds 
+Head Inserts of 32768 elements: 0.126136 seconds 
+Head Inserts of 65536 elements: 0.29812 seconds 
+Head Inserts of 65536 elements: 0.271813 seconds 
+Head Inserts of 131072 elements: 0.619973 seconds 
+Head Inserts of 262144 elements: 1.34443 seconds 
+Head Inserts of 524288 elements: 2.91079 seconds 
+Head Inserts of 1048576 elements: 6.28207 seconds 
+Head Inserts of 2097152 elements: 13.5587 seconds 
+Head Inserts of 4194304 elements: 29.1653 seconds 
+Head Inserts of 8388608 elements: 62.4115 seconds 
+Head Inserts of 16777216 elements: 137.07 seconds 

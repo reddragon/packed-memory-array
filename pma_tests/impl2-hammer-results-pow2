@@ -1,0 +1,32 @@
+Time taken for 1024 elements to be inserted at head: 0.000916
+57000 moves to insert 1024 elements at head
+Time taken for 2048 elements to be inserted at head: 0.002188
+137352 moves to insert 2048 elements at head
+Time taken for 4096 elements to be inserted at head: 0.005343
+330248 moves to insert 4096 elements at head
+Time taken for 8192 elements to be inserted at head: 0.012028
+786664 moves to insert 8192 elements at head
+Time taken for 16384 elements to be inserted at head: 0.051624
+1846280 moves to insert 16384 elements at head
+Time taken for 32768 elements to be inserted at head: 0.059720
+4158344 moves to insert 32768 elements at head
+Time taken for 65536 elements to be inserted at head: 0.183850
+9301384 moves to insert 65536 elements at head
+Time taken for 65536 elements to be inserted at head: 0.153761
+9301384 moves to insert 65536 elements at head
+Time taken for 131072 elements to be inserted at head: 0.360671
+20950792 moves to insert 131072 elements at head
+Time taken for 262144 elements to be inserted at head: 0.811401
+47189512 moves to insert 262144 elements at head
+Time taken for 524288 elements to be inserted at head: 1.772496
+104230280 moves to insert 524288 elements at head
+Time taken for 1048576 elements to be inserted at head: 3.914713
+229849416 moves to insert 1048576 elements at head
+Time taken for 2097152 elements to be inserted at head: 8.672258
+508317448 moves to insert 2097152 elements at head
+Time taken for 4194304 elements to be inserted at head: 19.172764
+1120863112 moves to insert 4194304 elements at head
+Time taken for 8388608 elements to be inserted at head: 42.135632
+2453371144 moves to insert 8388608 elements at head
+Time taken for 16777216 elements to be inserted at head: 91.961385
+5354881992 moves to insert 16777216 elements at head

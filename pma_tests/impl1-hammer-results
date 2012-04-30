@@ -1,0 +1,8 @@
+Head Inserts of 10 elements: 4.4e-05 seconds 
+Head Inserts of 100 elements: 0.000142 seconds 
+Head Inserts of 1000 elements: 0.00153 seconds 
+Head Inserts of 10000 elements: 0.023027 seconds 
+Head Inserts of 100000 elements: 0.461392 seconds 
+Head Inserts of 1000000 elements: 5.96756 seconds 
+Head Inserts of 10000000 elements: 76.6473 seconds 
+Head Inserts of 10000000 elements: 76.7418 seconds 

@@ -1,0 +1,32 @@
+Time taken for 1024 elements to be inserted randomly: 0.000613
+20440 moves to insert 1024 random elements
+Time taken for 2048 elements to be inserted randomly: 0.001334
+41624 moves to insert 2048 random elements
+Time taken for 4096 elements to be inserted randomly: 0.002948
+85528 moves to insert 4096 random elements
+Time taken for 8192 elements to be inserted randomly: 0.006334
+172312 moves to insert 8192 random elements
+Time taken for 16384 elements to be inserted randomly: 0.013540
+347416 moves to insert 16384 random elements
+Time taken for 32768 elements to be inserted randomly: 0.030960
+813816 moves to insert 32768 random elements
+Time taken for 65536 elements to be inserted randomly: 0.097688
+2028728 moves to insert 65536 random elements
+Time taken for 65536 elements to be inserted randomly: 0.097309
+2028728 moves to insert 65536 random elements
+Time taken for 131072 elements to be inserted randomly: 0.213175
+4452152 moves to insert 131072 random elements
+Time taken for 262144 elements to be inserted randomly: 0.439100
+9272888 moves to insert 262144 random elements
+Time taken for 524288 elements to be inserted randomly: 1.031814
+18980216 moves to insert 524288 random elements
+Time taken for 1048576 elements to be inserted randomly: 2.345533
+38251768 moves to insert 1048576 random elements
+Time taken for 2097152 elements to be inserted randomly: 5.685608
+76896696 moves to insert 2097152 random elements
+Time taken for 4194304 elements to be inserted randomly: 13.915120
+154280312 moves to insert 4194304 random elements
+Time taken for 8388608 elements to be inserted randomly: 32.571898
+309355704 moves to insert 8388608 random elements
+Time taken for 16777216 elements to be inserted randomly: 75.193598
+618580408 moves to insert 16777216 random elements

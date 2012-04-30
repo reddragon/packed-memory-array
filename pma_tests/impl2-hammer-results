@@ -1,0 +1,16 @@
+Time taken for 10 elements to be inserted at head: 0.000030
+80 moves to insert 10 elements at head
+Time taken for 100 elements to be inserted at head: 0.000081
+2952 moves to insert 100 elements at head
+Time taken for 1000 elements to be inserted at head: 0.000882
+55176 moves to insert 1000 elements at head
+Time taken for 10000 elements to be inserted at head: 0.015664
+1018760 moves to insert 10000 elements at head
+Time taken for 100000 elements to be inserted at head: 0.257920
+15317320 moves to insert 100000 elements at head
+Time taken for 1000000 elements to be inserted at head: 3.682044
+216959176 moves to insert 1000000 elements at head
+Time taken for 10000000 elements to be inserted at head: 51.632061
+3015270600 moves to insert 10000000 elements at head
+Time taken for 10000000 elements to be inserted at head: 52.316694
+3015270600 moves to insert 10000000 elements at head

@@ -1,0 +1,16 @@
+Random Inserts of 1024 elements: 0.000892 seconds 
+Random Inserts of 2048 elements: 0.025842 seconds 
+Random Inserts of 4096 elements: 0.003751 seconds 
+Random Inserts of 8192 elements: 0.008119 seconds 
+Random Inserts of 16384 elements: 0.017155 seconds 
+Random Inserts of 32768 elements: 0.044197 seconds 
+Random Inserts of 65536 elements: 0.127607 seconds 
+Random Inserts of 65536 elements: 0.134421 seconds 
+Random Inserts of 131072 elements: 0.277261 seconds 
+Random Inserts of 262144 elements: 0.629636 seconds 
+Random Inserts of 524288 elements: 1.42724 seconds 
+Random Inserts of 1048576 elements: 3.28648 seconds 
+Random Inserts of 2097152 elements: 7.75482 seconds 
+Random Inserts of 4194304 elements: 17.914 seconds 
+Random Inserts of 8388608 elements: 40.2886 seconds 
+Random Inserts of 16777216 elements: 87.7996 seconds 
