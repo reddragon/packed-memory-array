@@ -114,6 +114,10 @@ size $\sqrt{n}$ each is within threshold, we can start copying these
 elements back to the PMA. The total amortized cost to perform such a
 rebalance is $O(c\sqrt{n})$. The worst case cost per operation during
 the whole rebalancing process is $O(\sqrt{n})$.
+
+We note that we need to string together $c$ temporary arrays of size
+$O(\sqrt{n})$ for this whole operation. Since $c$ is at most
+$\sqrt{n}$, we need $O(n)$ extra space to perform the rebalance.
 \end{proof}
 
 \begin{theorem}
@@ -124,8 +128,8 @@ The number of elements in the parking lot never exceeds $O(\sqrt{n})$.
 
 \begin{proof}
 The parking will be most full when the root node of our imaginary tree
-is rebalanced since that will trigger the rebuilding of
-$O(\sqrt{n})$. When the root node is rebalanced, the parking lot will
+is rebalanced since that will trigger the rebuilding of $O(\sqrt{n})$
+lower trees. When the root node is rebalanced, the parking lot will
 contain $O(\sqrt{n})$ elements. We will show that the parking lot is
 emptied before the root node is rebalanced again.
 
