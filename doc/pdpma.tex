@@ -1,0 +1,116 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage{color}
+\usepackage{theorem}
+% \usepackage{listings}
+% \usepackage{savetrees}
+% \usetikzlibrary{shapes}
+
+\newenvironment{proof}{{\bf Proof:  }}{\hfill\rule{2mm}{2mm}}
+\newenvironment{proofof}[1]{{\bf Proof of #1:  }}{\hfill\rule{2mm}{2mm}}
+\newenvironment{proofofnobox}[1]{{\bf#1:  }}{}
+\newenvironment{example}{{\bf Example:  }}{\hfill\rule{2mm}{2mm}}
+
+\newtheorem{fact}{Fact}[section]
+\newtheorem{lemma}[fact]{Lemma}
+\newtheorem{theorem}[fact]{Theorem}
+\newtheorem{definition}[fact]{Definition}
+\newtheorem{corollary}[fact]{Corollary}
+\newtheorem{proposition}[fact]{Proposition}
+\newtheorem{claim}[fact]{Claim}
+\newtheorem{exercise}[fact]{Exercise}
+
+\linespread{1.5}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.9ex plus 0.5ex minus 0.2ex}
+
+\title{The Partially Deamortized Packed Memory Array}
+
+\author{Michael Corley, Dhruv Matani, Gaurav Menghani, Deepak Nettem}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  The abstract goes here
+\end{abstract}
+
+\clearpage
+
+\section{Introduction}
+Include refs. to:
+\begin{enumerate}
+\item Haodong's PMA
+\item Partially deamortized to $O(\sqrt{n}\log_2{n})$
+\item The Adaptive PMA
+\item Willard's Fully Deamortized PMA
+\item Demaine's lecture notes
+\item Bender's CSE638 lecture notes
+\end{enumerate}
+
+\section{How to partially deamortize the PMA?}
+
+The general strategy that we shall adopt while trying to partially
+deamortize the PMA is that of splitting the imaginary tree of the PMA
+into a top half and a bottom half. The imaginary tree has height
+$\log_2{n}$, so if we split it midway, we get roughly $1 +
+\sqrt{n}$ imaginary trees, $\sqrt{n}$ of which correspond to actual
+elements in the PMA. These trees are the $\sqrt{n}$ bottom trees, each
+having a height of $\frac{\log_2{n}}{2}$.
+
+We shall try to achieve the same amortized cost of $O(\log^2{n})$ per
+element update, but we shall try to bring the worst-case cost per
+update down from $O(n)$ to $O(\sqrt{n})$. This will come at the cost
+of $O(n)$ extra space.
+
+If a rebalance in the PMA causes elements to move within one of the
+bottom trees, we perform such a rebalance normally since it doesn't
+cost us more than $O(\sqrt{n})$. However, if a rebalance were to
+affect one of the nodes in the top tree, it most certainly spans more
+than one bottom tree. In such a situation, we re-build those trees
+piece-by-piece. While the rebuilding process of these trees is in
+progress, we shall perform element inserts into another data structure
+called the \textit{parking lot}. This \textit{parking lot} can be
+another PMA or even a simple array. The worst case cost to insert in
+the PMA or the array is
+$O(\#\ of\ elements\ in\ the\ parking\ lot)$. We shall show that the
+parking lot has size $O(\sqrt{n})$ and hence the worst case cost of
+any insert into the parking lot is $O(\sqrt{n})$. We can not use a
+linked list since we need to be able to do fast element lookups in the
+\textit{parking lot}\footnote{Thanks to Pablo for pointing this out!}.
+
+\begin{theorem}
+\textbf{Rebuilding trees without known the tree span}
+
+We can rebuild trees without known the span of the tree. i.e. without
+knowing the number of elements that belong to the current imaginary
+tree.
+
+\end{theorem}
+
+\begin{proof}
+We assume that we need such a tool only to rebalance trees that are
+rooted in the imaginary top tree, since the bottom trees can be
+re-balanced normally.
+
+We perform such a rebalance in 2 phases. In phase-1, we start copying
+elements to a temporary array of size $O(\sqrt{n})$. We shall start
+copying elements $\sqrt{n}$ at a time.
+
+We know that we can choose any window in the PMA as long as the window
+sizes grow exponentially (include reference). i.e. We select windows
+of size
+$\sqrt{n},\ 2\sqrt{n},\ 4\sqrt{n},\ 8\sqrt{n},\ and\ so\ on\ldots{}$.
+
+Once we have determined that a certain number of segments (say $c$) of
+size $\sqrt{n}$ each is within threshold, we can start copying these
+elements back to the PMA. The total amortized cost to perform such a
+rebalance is $O(c\sqrt{n})$. The worst case cost per operation during
+the whole rebalancing process is $O(\sqrt{n})$.
+\end{proof}
+
+\end{document}
