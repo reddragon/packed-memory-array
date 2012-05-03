@@ -84,12 +84,11 @@ linked list since we need to be able to do fast element lookups in the
 \textit{parking lot}\footnote{Thanks to Pablo for pointing this out!}.
 
 \begin{theorem}
-\textbf{Rebuilding trees without known the tree span}
+\textbf{Rebuilding trees without knowing the tree span}
 
 We can rebuild trees without known the span of the tree. i.e. without
 knowing the number of elements that belong to the current imaginary
 tree.
-
 \end{theorem}
 
 \begin{proof}
@@ -111,6 +110,65 @@ size $\sqrt{n}$ each is within threshold, we can start copying these
 elements back to the PMA. The total amortized cost to perform such a
 rebalance is $O(c\sqrt{n})$. The worst case cost per operation during
 the whole rebalancing process is $O(\sqrt{n})$.
+\end{proof}
+
+\begin{theorem}
+\textbf{The parking lot has $O(\sqrt{N})$ elements}
+
+The number of elements in the parking lot never exceeds $O(\sqrt{n})$.
+\end{theorem}
+
+\begin{proof}
+The parking will be most full when the root node of our imaginary tree
+is rebalanced since that will trigger the rebuilding of
+$O(\sqrt{n})$. When the root node is rebalanced, the parking lot will
+contain $O(\sqrt{n})$ elements. We will show that the parking lot is
+emptied before the root node is rebalanced again.
+
+In the worst case, the number of elements in the PMA is just 1 less
+than the maximum allowable for the given size. i.e. the PMA has
+physical size $2n$, and currently has $n-1$ elements. Note that each
+of the leaves of size $\Theta(\log_2{n})$ can become completely full
+since their density threshold is $1.0$. Their current density is just
+$0.5$. Similarly, for the lower trees (of size $\sqrt{n}$ each), the
+density threshold is $0.75$. Hence, it has space for $0.25\sqrt{n}$
+elements if we do not violate density thresholds. If we are okay with
+violating density thresholds (as we shall see later), we can actually
+insert $\frac{\sqrt{n}}{2}$ elements in each subtree of size
+$\sqrt{n}$ and hence $\sqrt{n}$ elements in 2 such subtrees.
+
+We consider multiple cases:
+
+\begin{enumerate}
+
+\item Suppose all the elements in the parking lot go to one of the
+  ends (begin or end) of the PMA or to some specific part of the PMA
+  (a.k.a. \textit{Hammer Inserts}). In this case, we can identify the
+  $2\sqrt{n}$ lower trees that can be rebuilt and we use a simple
+  merging strategy to offload the parking lot into these 2
+  subtrees. The density thresholds for these subtrees is violated, but
+  that is okay since the next rebuild will take care of that.
+
+\item Suppose every element goes into a different subtree. In this
+  case too, we pay a worst-case cost of $\Theta(\log^2{n})$ per
+  insert, and we can actually perform
+  $\Theta\left(\dfrac{\sqrt{n}}{\log^2{n}}\right)$ inserts to get a
+  worst case running time of $O(\sqrt{n})$ per operation.
+
+\end{enumerate}
+
+In a similar fashion, we can sub-divide the inserts from the parking
+lot into the PMA into cases where we insert $\Theta(\sqrt{n})$
+elements into a lower tree or fewer and handle them separately.
+
+Additionally, if we detect that the sum of the sizes of the PMA and
+the parking lot exceeds the density threshold at the root node, we can
+start copying elements into a new PMA of twice the size. This
+operation again copies $\sqrt{n}$ subtrees, each of size
+$O(\sqrt{n})$. Since we do not insert elements into the PMA while it
+is being rebalanced or copied, or parking lot is still capped at
+$O(\sqrt{n})$ in size.
+
 \end{proof}
 
 \end{document}
