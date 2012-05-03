@@ -54,6 +54,10 @@ Include refs. to:
 
 \section{How to partially deamortize the PMA?}
 
+We shall show how to partially deamortize a PMA (packed memory array)
+only subject to inserts. Each operation will cost $O(\log^2{n})$
+amortized and $O(\sqrt{n})$ worst case.
+
 The general strategy that we shall adopt while trying to partially
 deamortize the PMA is that of splitting the imaginary tree of the PMA
 into a top half and a bottom half. The imaginary tree has height
