@@ -150,8 +150,8 @@ We consider multiple cases:
   that is okay since the next rebuild will take care of that.
 
 \item Suppose every element goes into a different subtree. In this
-  case too, we pay a worst-case cost of $\Theta(\log^2{n})$ per
-  insert, and we can actually perform
+  case too, we pay a worst-case cost of $\Theta(\log^2{n})$ per insert
+  (since we have just rebalanced the PMA), and we can actually perform
   $\Theta\left(\dfrac{\sqrt{n}}{\log^2{n}}\right)$ inserts to get a
   worst case running time of $O(\sqrt{n})$ per operation.
 
@@ -170,5 +170,17 @@ is being rebalanced or copied, or parking lot is still capped at
 $O(\sqrt{n})$ in size.
 
 \end{proof}
+
+\section{Querying the Partially Deamortized PMA}
+
+Querying the \textit{PDPMA} is very simple. If no rebuild is in
+progress, we query the PDPMA as we normally would. On the other hand,
+if a rebuild is in progress, we query both the PDPMA as well as the
+parking lot to answer queries. We are sure that the lower density
+thresholds are meth even during a rebuild since we are making the PMA
+more sparse only if it has become too dense. i.e. we never violate the
+lower density thresholds even while we are in the middle of a rebuild
+operation.
+
 
 \end{document}
