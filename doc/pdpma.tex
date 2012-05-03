@@ -144,7 +144,9 @@ density threshold is $0.75$. Hence, it has space for $0.25\sqrt{n}$
 elements if we do not violate density thresholds. If we are okay with
 violating density thresholds (as we shall see later), we can actually
 insert $\frac{\sqrt{n}}{2}$ elements in each subtree of size
-$\sqrt{n}$ and hence $\sqrt{n}$ elements in 2 such subtrees.
+$\sqrt{n}$ and hence $\sqrt{n}$ elements in $k$ such subtrees. i.e. If
+we want to insert $\sqrt{n}$ elements, we set $k = 2$. In our case, we
+would want to insert $2\sqrt{n}$ elements to get $k = 4$.
 
 We consider multiple cases:
 
