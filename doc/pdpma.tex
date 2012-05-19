@@ -52,16 +52,16 @@
 One of the deficiencies in the traditional PMA is that one element
 insertions might trigger a rebalance of the entire array, which costs
 $\Theta(N)$ element moves. In contrast, the amortized number of
-element moves, $\Theta(log^2 N)$, is not that bad. When we do such an
-insertion in a massive database, triggering a scan of the entire
+element moves, $\Theta(\log^2{N})$, is not that bad. When we do such
+an insertion in a massive database, triggering a scan of the entire
 database is infeasible. We may not be able to (or want to) wait while
 the data structure rebuilds itself. To overcome this deficiency,
 following the work(s) of Bender, Cole, Demaine, Farach-Colton, and
 Zito \cite{2-simplified-algorithms}, and Willard \cite{willard},
-Haodong Hu in his thesis \cite{haodong-thesis} \cite{adaptive-pma}
+Haodong Hu in his thesis \cite{haodong-thesis, adaptive-pma}
 introduces a partially deamortized packed-memory array whose
 insert/delete cost per update is at most
-$\mathcal{O}({\sqrt{N}log\,N})$.  Even though Haodong Hu's pardially
+$\mathcal{O}({\sqrt{N}\log{N}})$.  Even though Haodong Hu's pardially
 deamortized PMA is considerably simpler than the fully deamortized one
 introduced by Willard, it is still hard to implement.
 
