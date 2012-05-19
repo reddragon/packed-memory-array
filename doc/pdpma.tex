@@ -1,7 +1,12 @@
-\documentclass{article}
-\usepackage{graphicx}
-\usepackage{amssymb}
+\documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[parfill]{parskip}
+
+\usepackage{amsfonts}
 \usepackage{amsmath}
+\usepackage{amssymb}
+% \usepackage{mathtools}
+\usepackage{graphicx}
 \usepackage{tikz}
 \usepackage{url}
 \usepackage{color}
@@ -28,28 +33,53 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1.9ex plus 0.5ex minus 0.2ex}
 
-\title{The Partially Deamortized Packed Memory Array}
-
-\author{Michael Corley, Dhruv Matani, Gaurav Menghani, Deepak Nettem}
+% Make title
+\title{Partially Deamortized Packed-Memory Array}
+\author{Michael A. Corley, Dhruv Matani, Gaurav Menghani, Deepak Nettem \\
+        Department of Computer Science \\
+        Stony Brook University \\
+        Stony Brook, New York, 11794}
+\date{}
 
 \begin{document}
 \maketitle
-
-\begin{abstract}
-  The abstract goes here
-\end{abstract}
+\bigskip
 
 \clearpage
 
 \section{Introduction}
-Include refs. to:
+
+One of the deficiencies in the traditional PMA is that one element
+insertions might trigger a rebalance of the entire array, which costs
+$\Theta(N)$ element moves. In contrast, the amortized number of
+element moves, $\Theta(log^2 N)$, is not that bad. When we do such an
+insertion in a massive database, triggering a scan of the entire
+database is infeasible. We may not be able to (or want to) wait while
+the data structure rebuilds itself. To overcome this deficiency,
+following the work(s) of Bender, Cole, Demaine, Farach-Colton, and
+Zito \cite{2-simplified-algorithms}, and Willard \cite{willard},
+Haodong Hu in his thesis \cite{haodong-thesis} \cite{adaptive-pma}
+introduces a partially deamortized packed-memory array whose
+insert/delete cost per update is at most
+$\mathcal{O}({\sqrt{N}log\,N})$.  Even though Haodong Hu's pardially
+deamortized PMA is considerably simpler than the fully deamortized one
+introduced by Willard, it is still hard to implement.
+
+In the rest of this paper, we propose an algorithm to partially
+deamortized the packed-memory that overcomes this deficiency making
+for a practical implementation to be possible. Our partially
+deamortized packed-memory array is a cache-oblivious data structure
+that has a cost per insert of at most $\mathcal{O}(\sqrt{N})$ element
+moves and $\mathcal{O}(1+ \frac{\sqrt{N}}{B})$ memory transfers, while having
+the same performance of $\mathcal{O}(1+\frac{log^2{N}}{B})$ amortized memory
+transfers as the traditional PMA.
+
+We have also used the following referenced to learn about the Packed Memory, Deamortization, and related problems.
+
 \begin{enumerate}
-\item Haodong's PMA -- Partially deamortized to $O(\sqrt{n}\log_2{n})$
-\item The Adaptive PMA
-\item Willard's Fully Deamortized PMA
-\item Demaine's lecture notes
-\item Bender's CSE638 lecture notes
-\item Jeff Ericsson's Notes on deamortization
+\item Eric Demaine's lecture notes \cite{demaine-lecture-notes}
+\item Michael Bender's CSE638 lecture notes
+\item Jeff Ericsson's Notes on deamortization \cite{jeffe-lecture-notes}
 \end{enumerate}
 
 \section{How to partially deamortize the PMA?}
@@ -202,5 +232,35 @@ thresholds are met even during a rebuild since we are making the PMA
 more sparse only if it has become too dense. i.e. we never violate the
 lower density thresholds even while we are in the middle of a rebuild
 operation.
+
+\begin{thebibliography}{}
+
+\bibitem{2-simplified-algorithms}
+  Two Simplified Algorithms for Maintaining Order in a List, 
+  Michael A. Bender, Richard Cole, Erik D. Demaine, Martin Farach-colton, Jack Zito, 
+  2002
+
+\bibitem{haodong-thesis}
+  Cache-Oblivious Data Structures for Massive Data Sets,
+  H. Hu,
+  2007
+
+\bibitem{adaptive-pma}
+  An Adaptive Packed-Memory Array,
+  M.A. Bender and H. Hu, 
+  Transactions on Database Systems Special Issue on PODS '06, 32(4): 2007.
+
+\bibitem{willard}
+  A density control algorithm for doing insertions and deletions in a sequentially ordered file in good worst-case time, 
+  D. E. Willard
+  Information and Computation, 97(2):150–204, 1992.
+
+\bibitem{demaine-lecture-notes}
+  \url{http://courses.csail.mit.edu/6.851/spring12/lectures/L08.pdf}
+
+\bibitem{jeffe-lecture-notes}
+  \url{http://compgeom.cs.uiuc.edu/~jeffe/teaching/datastructures/notes/01-statictodynamic.pdf}
+
+\end{thebibliography}
 
 \end{document}
